@@ -1,0 +1,12 @@
+<div class="row">
+
+  <!--filter instrument by departments-->
+  <div class="col-lg-3">
+    <app-department-list></app-department-list>
+    <!--<a [routerLink]="[{outlets:{instrumentOutlet: 'instrument-list'}}]"> main outlet</a>-->
+  </div>
+  <div class="col-lg-9">
+    <router-outlet></router-outlet>
+    <!--<router-outlet name="instrumentOutlet"></router-outlet>-->
+  </div>
+</div>
