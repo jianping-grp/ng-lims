@@ -1,30 +1,29 @@
-import './rxjs-extensions'
+import './rxjs-extensions';
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {HttpModule} from '@angular/http';
 
-import { AppComponent } from './app.component';
-import {AppRoutingModule} from "./app-routing.module";
-import {HomeModule} from "./home/home.module";
-import {AboutModule} from "./about/about.module";
-import {ErrorModule} from "./error/error.module";
-import {ShareService} from "./service/share.service";
+import {AppComponent} from './app.component';
+import {AppRoutingModule} from './app-routing.module';
+import {HomeModule} from './home/home.module';
+import {AboutModule} from './about/about.module';
+import {ErrorModule} from './error/error.module';
+import {ShareService} from './service/share.service';
 import {ApolloClient, createNetworkInterface} from 'apollo-client';
 import {ApolloModule} from 'apollo-angular';
-import {GqlService} from "./service/gql.service";
 import {ScheduleModule} from 'primeng/primeng';
-import {UserModule} from "./user/user.module";
-import {ShareModule} from "./share/share.module";
-import {LimsRestService} from "./service/lims-rest.service";
-import {AuthenticationService} from "./service/authentication.service";
+import {UserModule} from './user/user.module';
+import {ShareModule} from './share/share.module';
+import {LimsRestService} from './service/lims-rest.service';
+import {AuthenticationService} from './service/authentication.service';
 
 
-//create apollo graphql client
+// create apollo graphql client
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
-    uri: "http://localhost:8000/graphql"
+    uri: 'http://localhost:8000/graphql'
   }),
 });
 export function provideClient(): ApolloClient {
@@ -57,4 +56,5 @@ export function provideClient(): ApolloClient {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

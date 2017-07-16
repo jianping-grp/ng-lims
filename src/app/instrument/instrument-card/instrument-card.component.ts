@@ -24,7 +24,7 @@ export class InstrumentCardComponent implements OnInit {
     this.router.navigate([
       '/instrument/instrument-detail',
       this.instrument.id
-      //this.instrument.id
+      // this.instrument.id
       // {
       //   outlets: {
       //     instrumentOutlet: 'instrument-detail'

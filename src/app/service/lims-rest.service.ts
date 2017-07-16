@@ -11,8 +11,10 @@ import 'rxjs/add/operator/catch';
 @Injectable()
 export class LimsRestService {
   private restUrl = 'http://localhost:8000/api'
-
-  constructor(private http: Http) {
+  private headers = new Headers({'Content-Type':'application/json'})
+  constructor(
+    private http: Http
+  ) {
   }
 
   private fetchData(url: String): any {

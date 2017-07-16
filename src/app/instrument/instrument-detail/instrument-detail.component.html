@@ -1,4 +1,4 @@
-<div class="panel panel-info">
+<div class="panel panel-warning">
   <div class="panel-heading">
     <h3 class="panel-title">{{instrument?.name}}</h3>
   </div>
@@ -56,13 +56,22 @@
       </div>
     </div>
     <div class="row schedule">
+      <!--<button (click)=""></button>-->
       <p-schedule
-        [events]="reservationSet"
-        [header]="scheduleConfig"
+        [events]="scheduleEvents"
+        [header]="headerConfig"
         editable="true"
         locale="zh-cn"
-        [defaultView]="'agendaWeek'"
+        defaultView="agendaWeek"
+        scrollTime="08:00:00"
+        nowIndicator="true"
+        #pc
       ></p-schedule>
+
+      <!--[header]="scheduleConfig"-->
+
+      <!--locale="zh-cn"-->
+      <!--[defaultView]="'agendaWeek'"-->
 
       <!--<ul>-->
       <!--<li *ngFor="let reservation of reservationSet">{{reservation.user.firstName}} {{reservation.startTime}}</li>-->
