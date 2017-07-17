@@ -56,18 +56,46 @@
       </div>
     </div>
     <div class="row schedule">
-      <!--<button (click)=""></button>-->
+      <button (click)="reserve()">确认预约</button>
       <p-schedule
         [events]="scheduleEvents"
-        [header]="headerConfig"
+        [header]="header"
         editable="true"
         locale="zh-cn"
         defaultView="agendaWeek"
         scrollTime="08:00:00"
         nowIndicator="true"
-        #pc
-      ></p-schedule>
+        (onEventClick)="handleEventClick($event)"
+        (onDayClick)="handleDayClick($event)"
 
+      ></p-schedule>
+      <p-dialog header="预约详情" [(visible)]="dialogVisible" [responsive]="true" showEffect="fade" [modal]="false" [contentStyle]="{'overflow':'visible'}"
+                [style]="{'overflow':'visible'}" [resizable]="false">
+        <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="event">
+          <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label>Title</label></div>
+            <div class="ui-grid-col-8"><input pInputText [ngModel]="event.title" /></div>
+          </div>
+          <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label>Start</label></div>
+            <div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.start " dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>
+          </div>
+          <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label>End</label></div>
+            <div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.end" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>
+          </div>
+          <!--<div class="ui-grid-row">-->
+            <!--<div class="ui-grid-col-4"><label>All Day</label></div>-->
+            <!--<div class="ui-grid-col-8"><p-checkbox [(ngModel)]="event.allDay" binary="checkbox"></p-checkbox></div>-->
+          <!--</div>-->
+        </div>
+        <p-footer>
+          <div class="ui-dialog-buttonpane ui-helper-clearfix">
+            <button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete" [disabled]="!event?.id"></button>
+            <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start"></button>
+          </div>
+        </p-footer>
+      </p-dialog>
       <!--[header]="scheduleConfig"-->
 
       <!--locale="zh-cn"-->

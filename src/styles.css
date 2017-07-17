@@ -1,28 +1,28 @@
 
-html, body {
+body {
     /* Margin bottom by footer height */
 
-    margin-bottom: 65px;
-    height: 100%;
+    /*margin-bottom: 65px;*/
+    /*height: 100%;*/
+  margin:0;
+  padding:0;
+  
 }
 
-.tjab-home{
-    /*margin: 0 auto;*/
-    width: 95%;
-}
-footer {
-    background-color: transparent;
-    border-top: 0px;
-    bottom: 0;
-    width: 100%;
-    /* Set the fixed height of the footer here */
-    height: 60px;
-}
 
-.foot {
-    border-top: 1px solid #eeeeee;
-    padding-top: 15px;
-    /* todo: clean this code*/
-    margin-top: 500px;
+/*footer {*/
+    /*background-color: transparent;*/
+    /*border-top: 0px;*/
+    /*bottom: 0;*/
+    /*width: 100%;*/
+    /*!* Set the fixed height of the footer here *!*/
+    /*height: 60px;*/
+/*}*/
 
-}
+/*.foot {*/
+    /*border-top: 1px solid #eeeeee;*/
+    /*padding-top: 15px;*/
+    /*!* todo: clean this code*!*/
+    /*margin-top: 500px;*/
+
+/*}*/

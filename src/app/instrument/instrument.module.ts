@@ -7,14 +7,24 @@ import {DepartmentListComponent} from './department-list/department-list.compone
 import {InstrumentListComponent} from './instrument-list/instrument-list.component';
 import {InstrumentCardComponent} from './instrument-card/instrument-card.component';
 import {InstrumentDetailComponent} from './instrument-detail/instrument-detail.component';
-import {RouterModule} from '@angular/router';
-import {ScheduleModule} from 'primeng/primeng';
+import {
+  ButtonModule, CalendarModule, CheckboxModule, CodeHighlighterModule, DialogModule, InputTextModule, ScheduleModule,
+  TabViewModule
+} from 'primeng/primeng';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule,
+    FormsModule,
     ScheduleModule,
+    DialogModule,
+    InputTextModule,
+    CalendarModule,
+    CheckboxModule,
+    ButtonModule,
+    TabViewModule,
+    CodeHighlighterModule,
     InstrumentRoutingModule
   ],
   declarations: [

@@ -8,3 +8,10 @@ th {
 .schedule{
     margin-bottom: 50px;
 }
+.ui-grid-row div {
+  padding: 4px 10px
+}
+
+.ui-grid-row div label {
+  font-weight: bold;
+}

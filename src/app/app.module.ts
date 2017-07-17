@@ -18,6 +18,7 @@ import {UserModule} from './user/user.module';
 import {ShareModule} from './share/share.module';
 import {LimsRestService} from './service/lims-rest.service';
 import {AuthenticationService} from './service/authentication.service';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 
 // create apollo graphql client
@@ -39,6 +40,7 @@ export function provideClient(): ApolloClient {
     FormsModule,
     HttpModule,
     ApolloModule.forRoot(provideClient),
+    BrowserAnimationsModule,
     HomeModule,
     AboutModule,
     ErrorModule,
