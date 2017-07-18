@@ -63,18 +63,20 @@
         editable="true"
         locale="zh-cn"
         defaultView="agendaWeek"
-        scrollTime="08:00:00"
+        scrollTime="07:00:00"
         nowIndicator="true"
         (onEventClick)="handleEventClick($event)"
         (onDayClick)="handleDayClick($event)"
-
+        (onEventDrop)="handleDragResize($event)"
+        (onEventResize)="handleDragResize($event)"
+        #pc
       ></p-schedule>
       <p-dialog header="预约详情" [(visible)]="dialogVisible" [responsive]="true" showEffect="fade" [modal]="false" [contentStyle]="{'overflow':'visible'}"
                 [style]="{'overflow':'visible'}" [resizable]="false">
         <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="event">
           <div class="ui-grid-row">
             <div class="ui-grid-col-4"><label>Title</label></div>
-            <div class="ui-grid-col-8"><input pInputText [ngModel]="event.title" /></div>
+            <div class="ui-grid-col-8"><input pInputText [(ngModel)]="event.title" disabled/></div>
           </div>
           <div class="ui-grid-row">
             <div class="ui-grid-col-4"><label>Start</label></div>

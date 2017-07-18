@@ -1,20 +1,13 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Instrument} from '../../models/instrument';
 import {ActivatedRoute, Params} from '@angular/router';
 import 'rxjs/add/operator/switchMap';
 import {LimsRestService} from '../../service/lims-rest.service';
 import {ScheduleReservation} from '../../models/schedule-reservation';
 import set = Reflect.set;
-import {Reservation} from '../../models/reservation';
 import {Http} from '@angular/http';
-
-// export class ScheduleReservation{
-//   id:number;
-//   title:string;
-//   start:string;
-//   end:string;
-//   // allDay:boolean = true
-// }
+import {Reservation} from '../../models/reservation';
+import {User} from '../../models/user';
 
 @Component({
   selector: 'app-instrument-detail',
@@ -22,59 +15,38 @@ import {Http} from '@angular/http';
   styleUrls: ['./instrument-detail.component.css']
 })
 export class InstrumentDetailComponent implements OnInit{
+  myUser = new User; // simulate a user
   instrument: Instrument;
   errorMsg: string;
   instrumentId:number;
-  // todo clean this code
+
   scheduleEvents: any[];
-  event: ScheduleReservation;
+  event: ScheduleReservation;  // event为了跟html中的event交互； selecetedEvent为了记录当前选择了哪个event
+  selectedEvent:ScheduleReservation;
+
   header:any;
   dialogVisible:boolean=false;
   idGen:number=100;
 
+  allReservations:Reservation[];
 
   constructor(
            private restService: LimsRestService,
-           private route: ActivatedRoute,
+           private activatedRoute: ActivatedRoute,
            private http:Http,
            private cd : ChangeDetectorRef
   ) {
-  }
+    this.myUser.last_name='赵';
+    this.myUser.first_name='宇飞';
 
+  }
   ngOnInit() {
-    // this.scheduleEvents = [
-    //   {
-    //     'title': '小红',
-    //     'start': '2017-07-16T08:00:00',
-    //     'end': '2017-07-16T14:00:00'
-    //   },
-    //   {
-    //     'title': '李亮预约',
-    //     'start': '2017-07-17T08:00:00',
-    //     'end': '2017-07-17T14:00:00'
-    //   },
-    //   {
-    //     'title': '张竞预约',
-    //     'start': '2017-07-17T15:00:00',
-    //     'end': '2017-07-17T17:30:00'
-    //   },
-    //   {
-    //     'title': '小王',
-    //     'start': '2017-07-16T16:00:00Z',
-    //     'end': '2017-07-16T18:00:00Z'
-    //   },
-    //   {
-    //     'title': '全程会议',
-    //     'start': '2017-07-11',
-    //     'end': '2017-07-13'
-    //   }
-    // ]
     this.header = {
       left: 'prev listWeek next today',
       center: 'title',
       right: 'month,agendaWeek,agendaDay'
     };
-    this.route.params
+    this.activatedRoute.params
     // (+) converts string 'id' to a number
       .subscribe((params: Params) => this.getInstrument(+params['id']));
   }
@@ -95,6 +67,7 @@ export class InstrumentDetailComponent implements OnInit{
     this.restService.getReservation(instrumentId)
       .subscribe(
         allReservations => {
+          this.allReservations = allReservations;
           console.log('选中的instrument的所有预约情况' , allReservations)
           allReservations.map(reservation => {
             const event = new ScheduleReservation;
@@ -108,59 +81,80 @@ export class InstrumentDetailComponent implements OnInit{
       )
     // console.log(this.scheduleEvents)
   }
-  // todo 现在实现了scheduleEvents换成新的 它会自动更新。下面做向后台发送的。
 
 
   // start.stripTime().format()可以将日期转化成yyyy-mm-dd;
   handleEventClick(e){
-    this.event = new ScheduleReservation();
+    this.dialogVisible = true;
+    this.event = new ScheduleReservation;
     this.event.title = e.calEvent.title;
-
     let start = e.calEvent.start;
     let end = e.calEvent.end;
-    if (e.view.name === 'month'){
+
+    if (e.view.name === 'agendaWeek'){
       start.stripTime()
-    }
-    if (start){
-      start.stripTime();
-      this.event.start = start.format()// start.stripTime().format()可以将日期转化成yyyy-mm-dd；
     }
     if (end){
       end.stripTime();
       this.event.end = end.format();
     }
+    this.event.start = start.format(); // start.stripTime().format()可以将日期转化成yyyy-mm-dd；
     this.event.id = e.calEvent.id;
-    console.log('EventClick时，得到事件的开始时间格式，start.stripTime().format():',start.stripTime().format());
-
-    // this.event.allDay = e.calEvent.allDay;
-    this.dialogVisible = true;
+    // console.log('EventClick时，得到事件的开始时间格式，start.format():',start.format());
+    console.log('EventClick的scheduleEvents：',this.scheduleEvents)
   }
-
   handleDayClick(e){
-
-    this.event = new ScheduleReservation();
-    console.log('DayClick时，得到事件的开始时间格式，start.format()|start.stripTime():',e.date.format(),'|',e.date.stripTime());
-    this.event.start = e.date.stripTime().format();
-
     this.dialogVisible = true;
+    this.event = new ScheduleReservation;
+    // console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
+    this.event.start = e.date.stripTime().format();
+    this.event.title = this.myUser.last_name+this.myUser.first_name;
     this.cd.detectChanges()
+    console.log('DayClick的scheduleEvents：',this.scheduleEvents)
   }
-// todo 下一步做save和delete；
   saveEvent(){
     //update
     if (this.event.id){
       let index:number = this.findEventIndexById(this.event.id);
       if (index >= 0){
+        this.selectedEvent = this.event;
         this.scheduleEvents[index] = this.event;
       }
     }
+    //create
     else {
-      this.event.id = this.idGen++;
+      this.event.id = this.idGen++;  // todo id的设置问题，能否用UUID？
+      this.selectedEvent = this.event;
       this.scheduleEvents.push(this.event);
       this.event = null;
     }
-  }
 
+    this.dialogVisible=false;
+    console.log('save的scheduleEvents：',this.scheduleEvents)
+  }
+  deleteEvent(){
+    let index:number = this.findEventIndexById(this.event.id);
+    if (index>=0){
+      this.scheduleEvents.splice(index,1)
+    }
+    this.dialogVisible = false;
+    console.log('delete的scheduleEvents：',this.scheduleEvents)
+  }
+  handleDragResize(e){
+      let event = new ScheduleReservation;
+      this.selectedEvent = new ScheduleReservation;
+      event.id = e.event.id;
+      event.title = e.event.title;
+      event.start = e.event.start? e.event.start.format() : null;
+      event.end = e.event.end? e.event.end.format() : null;
+      this.selectedEvent = event;
+
+      let index:number = this.findEventIndexById(e.event.id);
+      if (index >= 0){
+        this.scheduleEvents[index] = event;
+      }
+      console.log('拖动的scheduleEvents：',this.scheduleEvents)
+  }
   findEventIndexById(id:number){
     let index = -1;
     for (let i = 0;i<this.scheduleEvents.length;i++){
@@ -171,65 +165,54 @@ export class InstrumentDetailComponent implements OnInit{
     }
     return index;
   }
-
+// todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。
   reserve(){
-    // const newReservation= new Reservation;
-    // let body1={
-    //   "start_time":this.scheduleEvents[0].start,
-    //   "end_time":this.scheduleEvents[0].end
-    // }
-    let body2=[{
-      "id": 1,
-      "user": {
-      "id": 12,
-        "password": "pbkdf2_sha256$36000$9izMGBeZUcNl$+jK2KnkGVKZo+aZF5dp+1TzPuInZlo8YdRF2+uzp2Tw=",
-        "last_login": null,
-        "is_superuser": false,
-        "username": "zhonghua",
-        "first_name": "中华",
-        "last_name": "王",
-        "email": "zhonghua@tjab.org",
-        "is_staff": false,
-        "is_active": true,
-        "date_joined": "2017-07-12T07:16:00Z",
-        "phone": null,
-        "birth_date": null,
-        "groups": [],
-        "user_permissions": []
-    },
-      "start_time": "2017-07-12T09:17:00Z",
-      "end_time": "2017-07-12T12:17:00Z",
-      "instrument": 5
-    }]
-    this.http.put('http://localhost:8000/api/reservation/?instrument=5',body2)
-      // .map((res:Response)=>res.json())
-      .subscribe(data=>console.log(data))
+    if (!this.selectedEvent){
+      alert('请选择您要修改的预约或创建新的预约')
+    }
+    else if (this.selectedEvent && (!this.selectedEvent.end || !this.selectedEvent.start)){
+      alert('请检查您预约的开始和结束时间')
+    }
+    else if (this.selectedEvent && this.selectedEvent.start && this.selectedEvent.end && this.selectedEvent.id){
+      if (confirm('确认预约吗？')){
+        // todo update the former reservation;
+        console.log('selectedEvent:',this.selectedEvent);
 
-    // console.log(this.scheduleEvents)
+        // found the event's id;
+        let index = this.findEventIndexById(this.selectedEvent.id);
+        if (this.allReservations[index]){
+          const reservation=this.allReservations[index];
+          let newReservation= new Reservation;
+          newReservation.id=reservation.id;
+          newReservation.user=reservation.user;
+          newReservation.instrument=reservation.instrument;
+          newReservation.start_time=this.scheduleEvents[index].start;
+          newReservation.end_time=this.scheduleEvents[index].end;
+          console.log('newReservation:',newReservation)
+          // this.http.put(`http://localhost:8000/api/reservation/${this.selectedEvent.id}`,newReservation)
+          //   // .map((res:Response)=>res.json())
+          //   .subscribe(data=>console.log(data))
+        }
+        // todo create the new reservation;
+        else {
+          let newReservation= new Reservation;
+          newReservation.id=this.selectedEvent.id;
+          newReservation.start_time=this.selectedEvent.start;
+          newReservation.end_time=this.selectedEvent.end;
+          newReservation.instrument=this.allReservations[0].instrument;
+
+          newReservation.user=this.myUser;
+          console.log('newReservation:',newReservation)
+          // this.http.post(`http://localhost:8000/api/reservation/?instrument=5`,newReservation)
+          //   // .map((res:Response)=>res.json())
+          //   .subscribe(data=>console.log(data))
+        }
+      }
+    }
+  }
+  // todo delete the former reservation;
+  deleteReservation(){
+
   }
 
 }
-
-// {
-//   "id": 1,
-//   "user": {
-//   "id": 12,
-//     "password": "pbkdf2_sha256$36000$9izMGBeZUcNl$+jK2KnkGVKZo+aZF5dp+1TzPuInZlo8YdRF2+uzp2Tw=",
-//     "last_login": null,
-//     "is_superuser": false,
-//     "username": "zhonghua",
-//     "first_name": "中华",
-//     "last_name": "王",
-//     "email": "zhonghua@tjab.org",
-//     "is_staff": false,
-//     "is_active": true,
-//     "date_joined": "2017-07-12T07:16:00Z",
-//     "phone": null,
-//     "birth_date": null,
-//     "groups": [],
-//     "user_permissions": []
-// },
-//   "start_time": "2017-07-12T07:17:00Z",
-//   "end_time": "2017-07-12T11:17:00Z",
-//   "instrument": 5
-// }
