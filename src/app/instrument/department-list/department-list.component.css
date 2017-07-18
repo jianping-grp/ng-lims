@@ -1,6 +1,9 @@
 li.selected{
     background-color: #eeeeee;
 }
+.panel-heading h6{
+  color: #ffffff;
+}
 .panel-body{
     padding: 15px 0px 15px 0px;
 }

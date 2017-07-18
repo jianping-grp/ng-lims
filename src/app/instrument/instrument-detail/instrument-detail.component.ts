@@ -18,7 +18,7 @@ export class InstrumentDetailComponent implements OnInit{
   myUser = new User; // simulate a user
   instrument: Instrument;
   errorMsg: string;
-  instrumentId:number;
+
 
   scheduleEvents: any[];
   event: ScheduleReservation;  // event为了跟html中的event交互； selecetedEvent为了记录当前选择了哪个event
@@ -56,7 +56,6 @@ export class InstrumentDetailComponent implements OnInit{
         instrument => {
           console.log('选中的instrument信息：' , instrument)
           this.instrument = instrument;
-          this.instrumentId =instrument.id;
           this.getReservation(this.instrument.id);
         },
         error => this.errorMsg = error
@@ -199,7 +198,7 @@ export class InstrumentDetailComponent implements OnInit{
           newReservation.id=this.selectedEvent.id;
           newReservation.start_time=this.selectedEvent.start;
           newReservation.end_time=this.selectedEvent.end;
-          newReservation.instrument=this.allReservations[0].instrument;
+          newReservation.instrument=this.instrument.id;
 
           newReservation.user=this.myUser;
           console.log('newReservation:',newReservation)
