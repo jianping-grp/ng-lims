@@ -164,7 +164,7 @@ export class InstrumentDetailComponent implements OnInit{
     }
     return index;
   }
-// todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。
+// todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。应用Subject
   reserve(){
     if (!this.selectedEvent){
       alert('请选择您要修改的预约或创建新的预约')
