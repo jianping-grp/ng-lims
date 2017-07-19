@@ -28,7 +28,7 @@ export class InstrumentDetailComponent implements OnInit{
   dialogVisible:boolean=false;
   idGen:number=100;
 
-  allReservations:Reservation[];
+  initReservations:Reservation[];
 
   constructor(
            private restService: LimsRestService,
@@ -38,7 +38,7 @@ export class InstrumentDetailComponent implements OnInit{
   ) {
     this.myUser.last_name='赵';
     this.myUser.first_name='宇飞';
-
+    this.selectedEvent = new ScheduleReservation()
   }
   ngOnInit() {
     this.header = {
@@ -65,11 +65,11 @@ export class InstrumentDetailComponent implements OnInit{
     this.scheduleEvents = [];
     this.restService.getReservation(instrumentId)
       .subscribe(
-        allReservations => {
-          this.allReservations = allReservations;
-          console.log('选中的instrument的所有预约情况' , allReservations)
-          allReservations.map(reservation => {
-            const event = new ScheduleReservation;
+        initReservations => {
+          this.initReservations = initReservations;
+          console.log('选中的instrument的所有预约情况' , initReservations)
+          initReservations.map(reservation => {
+            const event = new ScheduleReservation();
             event['id']=reservation.id;
             event['title'] = reservation.user.last_name + reservation.user.first_name;
             event['start'] = reservation.start_time ;
@@ -78,35 +78,43 @@ export class InstrumentDetailComponent implements OnInit{
           })
         }
       )
-    // console.log(this.scheduleEvents)
   }
 
-
   // start.stripTime().format()可以将日期转化成yyyy-mm-dd;
+  wantDelete:boolean = false;
+  event2;
+  // todo 设置删除模式
   handleEventClick(e){
-    this.dialogVisible = true;
-    this.event = new ScheduleReservation;
-    this.event.title = e.calEvent.title;
-    let start = e.calEvent.start;
-    let end = e.calEvent.end;
 
-    if (e.view.name === 'agendaWeek'){
-      start.stripTime()
-    }
-    if (end){
-      end.stripTime();
-      this.event.end = end.format();
-    }
-    this.event.start = start.format(); // start.stripTime().format()可以将日期转化成yyyy-mm-dd；
-    this.event.id = e.calEvent.id;
-    // console.log('EventClick时，得到事件的开始时间格式，start.format():',start.format());
-    console.log('EventClick的scheduleEvents：',this.scheduleEvents)
+    // if (confirm('确定删除此预约吗')){
+    //   console.log('删除预约的id：',e.calEvent.id)
+    // }
+    // this.event.id = e.calEvent.id;
+
+    // this.event = new ScheduleReservation();
+    // this.event.title = e.calEvent.title;
+    // let start = e.calEvent.start;
+    // let end = e.calEvent.end;
+    // if (end){
+    //   end.stripTime();
+    //   this.event.end = end.format();
+    //
+    // }
+    // if (start){
+    //   start.stripTime();
+    //   this.event.start = start.format();
+    // }
+    // // this.event.start = start.format(); // start.stripTime().format()可以将日期转化成yyyy-mm-dd；
+    // this.event.id = e.calEvent.id;
+    // // console.log('EventClick时，得到事件的开始时间格式，start.format():',start.format());
+    // console.log('EventClick的scheduleEvents：',this.scheduleEvents)
+    // console.log(this.event)
   }
   handleDayClick(e){
     this.dialogVisible = true;
-    this.event = new ScheduleReservation;
-    // console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
-    this.event.start = e.date.stripTime().format();
+    this.event = new ScheduleReservation();
+    console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
+    this.event.start = e.date.format();
     this.event.title = this.myUser.last_name+this.myUser.first_name;
     this.cd.detectChanges()
     console.log('DayClick的scheduleEvents：',this.scheduleEvents)
@@ -116,6 +124,7 @@ export class InstrumentDetailComponent implements OnInit{
     if (this.event.id){
       let index:number = this.findEventIndexById(this.event.id);
       if (index >= 0){
+        console.log('save，this.event:',this.event)
         this.selectedEvent = this.event;
         this.scheduleEvents[index] = this.event;
       }
@@ -134,18 +143,32 @@ export class InstrumentDetailComponent implements OnInit{
   deleteEvent(){
     let index:number = this.findEventIndexById(this.event.id);
     if (index>=0){
+      this.selectedEvent = this.event;
       this.scheduleEvents.splice(index,1)
     }
     this.dialogVisible = false;
-    console.log('delete的scheduleEvents：',this.scheduleEvents)
+    console.log('delete的scheduleEvents：',this.selectedEvent,this.scheduleEvents)
   }
+
+
   handleDragResize(e){
-      let event = new ScheduleReservation;
-      this.selectedEvent = new ScheduleReservation;
+    /**
+     * 1 当点击事件的时候，必然是在弹出预约框的基础上，已经有this.event.id;
+     * 2 当拖动的时候，已经有e.event.id;
+     * todo:
+     */
+    console.log(this.scheduleEvents)
+    this.selectedEvent = new ScheduleReservation();
+    console.log('e:',e)
+      let event = new ScheduleReservation();
+
       event.id = e.event.id;
       event.title = e.event.title;
-      event.start = e.event.start? e.event.start.format() : null;
-      event.end = e.event.end? e.event.end.format() : null;
+      let start = e.event.start;
+      let end = e.event.end;
+      console.log('start:',start, 'end:',end)
+      event.start =start? start.format() : null;
+      event.end =end? end.format() : null;
       this.selectedEvent = event;
 
       let index:number = this.findEventIndexById(e.event.id);
@@ -179,8 +202,9 @@ export class InstrumentDetailComponent implements OnInit{
 
         // found the event's id;
         let index = this.findEventIndexById(this.selectedEvent.id);
-        if (this.allReservations[index]){
-          const reservation=this.allReservations[index];
+
+        if (this.initReservations[index]){
+          const reservation=this.initReservations[index];
           let newReservation= new Reservation;
           newReservation.id=reservation.id;
           newReservation.user=reservation.user;
@@ -215,3 +239,4 @@ export class InstrumentDetailComponent implements OnInit{
   }
 
 }
+// todo:预约冲突，颜色区分，
