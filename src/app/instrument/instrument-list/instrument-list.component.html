@@ -9,3 +9,47 @@
 <!--<li *ngFor="let instrument of instrumentList">-->
   <!--{{instrument.name}}-->
 <!--</li>-->
+
+
+
+<!--<div class="content-section introduction">-->
+  <!--<div>-->
+    <!--<span class="feature-title">Schedule</span>-->
+    <!--<span>Schedule is an event calendar based on FullCalendar. This sample demonstrates a crud scenario using a Dialog.</span>-->
+  <!--</div>-->
+<!--</div>-->
+
+<!--<div class="content-section implementation">-->
+  <!--<p-schedule [events]="events" [header]="header" [editable]="true"-->
+              <!--scrollTime="07:00:00"-->
+              <!--nowIndicator="true"-->
+              <!--(onDayClick)="handleDayClick($event)" (onEventClick)="handleEventClick($event)"></p-schedule>-->
+
+  <!--<p-dialog header="Event Details" [(visible)]="dialogVisible" [responsive]="true" showEffect="fade" [modal]="false" [contentStyle]="{'overflow':'visible'}"-->
+            <!--[style]="{'overflow':'visible'}" [resizable]="false">-->
+    <!--<div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="event">-->
+      <!--<div class="ui-grid-row">-->
+        <!--<div class="ui-grid-col-4"><label >Title</label></div>-->
+        <!--<div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="event.title" /></div>-->
+      <!--</div>-->
+      <!--<div class="ui-grid-row">-->
+        <!--<div class="ui-grid-col-4"><label >Start</label></div>-->
+        <!--<div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.start" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>-->
+      <!--</div>-->
+      <!--<div class="ui-grid-row">-->
+        <!--<div class="ui-grid-col-4"><label >End</label></div>-->
+        <!--<div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.end" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>-->
+      <!--</div>-->
+      <!--&lt;!&ndash;<div class="ui-grid-row">&ndash;&gt;-->
+      <!--&lt;!&ndash;<div class="ui-grid-col-4"><label >All Day</label></div>&ndash;&gt;-->
+      <!--&lt;!&ndash;<div class="ui-grid-col-8"><p-checkbox [(ngModel)]="event.allDay" binary="checkbox"></p-checkbox></div>&ndash;&gt;-->
+      <!--&lt;!&ndash;</div>&ndash;&gt;-->
+    <!--</div>-->
+    <!--<p-footer>-->
+      <!--<div class="ui-dialog-buttonpane ui-helper-clearfix">-->
+        <!--<button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete" [disabled]="!event?.id"></button>-->
+        <!--<button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start"></button>-->
+      <!--</div>-->
+    <!--</p-footer>-->
+  <!--</p-dialog>-->
+<!--</div>-->

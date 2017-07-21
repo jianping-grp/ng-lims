@@ -4,10 +4,11 @@ import {ActivatedRoute, Params} from '@angular/router';
 import 'rxjs/add/operator/switchMap';
 import {LimsRestService} from '../../service/lims-rest.service';
 import {ScheduleReservation} from '../../models/schedule-reservation';
-import set = Reflect.set;
 import {Http} from '@angular/http';
 import {Reservation} from '../../models/reservation';
 import {User} from '../../models/user';
+import * as moment from 'moment';
+
 
 @Component({
   selector: 'app-instrument-detail',
@@ -20,7 +21,7 @@ export class InstrumentDetailComponent implements OnInit{
   errorMsg: string;
 
 
-  scheduleEvents: any[];
+  scheduleEvents: ScheduleReservation[];
   event: ScheduleReservation;  // event为了跟html中的event交互； selecetedEvent为了记录当前选择了哪个event
   selectedEvent:ScheduleReservation;
 
@@ -30,6 +31,9 @@ export class InstrumentDetailComponent implements OnInit{
 
   initReservations:Reservation[];
 
+  dateTo:moment.Moment;
+  a2eOptions;
+
   constructor(
            private restService: LimsRestService,
            private activatedRoute: ActivatedRoute,
@@ -38,8 +42,13 @@ export class InstrumentDetailComponent implements OnInit{
   ) {
     this.myUser.last_name='赵';
     this.myUser.first_name='宇飞';
-    this.selectedEvent = new ScheduleReservation()
+    this.selectedEvent = new ScheduleReservation();
+    this.dateTo = moment();
+    this.a2eOptions = {
+      format:'YYYY-MM-DDTHH:mm:ssZ'
+    }
   }
+  // todo 查calendar api,用bootstrap-timepicker
   ngOnInit() {
     this.header = {
       left: 'prev listWeek next today',
@@ -81,16 +90,52 @@ export class InstrumentDetailComponent implements OnInit{
   }
 
   // start.stripTime().format()可以将日期转化成yyyy-mm-dd;
-  wantDelete:boolean = false;
-  event2;
-  // todo 设置删除模式
+  // wantDelete:boolean = false;
+  handleDayClick(e){
+    this.dialogVisible = true;
+    this.event = new ScheduleReservation();
+    console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
+    this.event.start = e.date.format();
+    this.event.title = this.myUser.last_name+this.myUser.first_name;
+    // this.cd.detectChanges()
+    console.log('DayClick的scheduleEvents：',this.scheduleEvents)
+  }
+
   handleEventClick(e){
+    /***
+     * this.event用来显示弹出框的一份信息，event用来保存另一份信息到scheduleEvents(显示日程表的信息)
+     */
+    const event = new ScheduleReservation();
+    event.id = e.calEvent.id;
+    event.title = e.calEvent.title;
+    event.start = e.calEvent.start? e.calEvent.start.format() : null;
+    event.end = e.calEvent.end? e.calEvent.end.format() : null;
+    event.backgroundColor = 'black'; // todo:点击时显示不同的背景颜色.
+
+    this.event = new ScheduleReservation();
+    let start = e.calEvent.start;
+    let end = e.calEvent.end;
+    this.event.start = start? start.stripTime().format(): null;
+    // this.event.end = end? end.stripTime().format(): null;
+    this.event.id = e.calEvent.id;
+    this.event.title = e.calEvent.title;
+    this.dialogVisible = true;
+
+    if (event.id){
+      let index:number = this.findEventIndexById(event.id);
+      if (index >= 0){
+        console.log('eventclick, event:',event)
+        this.selectedEvent= event
+        this.scheduleEvents[index] = event;
+      }
+    }
+    console.log('EventClick的scheduleEvents：',this.scheduleEvents)
+    console.log(this.event)
 
     // if (confirm('确定删除此预约吗')){
     //   console.log('删除预约的id：',e.calEvent.id)
     // }
     // this.event.id = e.calEvent.id;
-
     // this.event = new ScheduleReservation();
     // this.event.title = e.calEvent.title;
     // let start = e.calEvent.start;
@@ -107,18 +152,8 @@ export class InstrumentDetailComponent implements OnInit{
     // // this.event.start = start.format(); // start.stripTime().format()可以将日期转化成yyyy-mm-dd；
     // this.event.id = e.calEvent.id;
     // // console.log('EventClick时，得到事件的开始时间格式，start.format():',start.format());
-    // console.log('EventClick的scheduleEvents：',this.scheduleEvents)
-    // console.log(this.event)
   }
-  handleDayClick(e){
-    this.dialogVisible = true;
-    this.event = new ScheduleReservation();
-    console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
-    this.event.start = e.date.format();
-    this.event.title = this.myUser.last_name+this.myUser.first_name;
-    this.cd.detectChanges()
-    console.log('DayClick的scheduleEvents：',this.scheduleEvents)
-  }
+
   saveEvent(){
     //update
     if (this.event.id){
@@ -132,7 +167,7 @@ export class InstrumentDetailComponent implements OnInit{
     //create
     else {
       this.event.id = this.idGen++;  // todo id的设置问题，能否用UUID？
-      this.selectedEvent = this.event;
+      // this.selectedEvent = this.event;
       this.scheduleEvents.push(this.event);
       this.event = null;
     }
@@ -149,8 +184,6 @@ export class InstrumentDetailComponent implements OnInit{
     this.dialogVisible = false;
     console.log('delete的scheduleEvents：',this.selectedEvent,this.scheduleEvents)
   }
-
-
   handleDragResize(e){
     /**
      * 1 当点击事件的时候，必然是在弹出预约框的基础上，已经有this.event.id;
@@ -233,7 +266,7 @@ export class InstrumentDetailComponent implements OnInit{
       }
     }
   }
-  // todo delete the former reservation;
+  // todo delete the former reservation; // todo 设置删除模式
   deleteReservation(){
 
   }

@@ -13,6 +13,8 @@ import {
 } from 'primeng/primeng';
 import {FormsModule} from '@angular/forms';
 
+import 'eonasdan-bootstrap-datetimepicker';
+import {DateTimePickerDirective} from 'ng2-eonasdan-datetimepicker/dist/datetimepicker.directive';
 @NgModule({
   imports: [
     CommonModule,
@@ -25,14 +27,15 @@ import {FormsModule} from '@angular/forms';
     ButtonModule,
     TabViewModule,
     CodeHighlighterModule,
-    InstrumentRoutingModule
+    InstrumentRoutingModule,
   ],
   declarations: [
     InstrumentComponent,
     DepartmentListComponent,
     InstrumentListComponent,
     InstrumentCardComponent,
-    InstrumentDetailComponent
+    InstrumentDetailComponent,
+    DateTimePickerDirective,
   ]
 })
 export class InstrumentModule {

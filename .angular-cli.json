@@ -25,6 +25,7 @@
         "../node_modules/primeng/resources/themes/bootstrap/theme.css",
         "../node_modules/primeng/resources/primeng.min.css",
         "./assets/css/my-bootswatch.less",
+        "../node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css",
         "styles.css"
       ],
       "scripts": [

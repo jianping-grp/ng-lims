@@ -44,11 +44,11 @@ export function provideClient(): ApolloClient {
     HomeModule,
     AboutModule,
     ErrorModule,
-    // InstrumentModule,
     ScheduleModule,
     UserModule,
     ShareModule,
-    AppRoutingModule
+    AppRoutingModule,
+
 
   ],
   providers: [
