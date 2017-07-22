@@ -24,8 +24,8 @@
         "../node_modules/font-awesome/css/font-awesome.min.css",
         "../node_modules/primeng/resources/themes/bootstrap/theme.css",
         "../node_modules/primeng/resources/primeng.min.css",
+        "../node_modules/ng-pick-datetime/styles/picker.min.css",
         "./assets/css/my-bootswatch.less",
-        "../node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css",
         "styles.css"
       ],
       "scripts": [

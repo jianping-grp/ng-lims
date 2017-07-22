@@ -35,7 +35,7 @@
     "graphql-tag": "^2.4.0",
     "jquery": "^3.2.1",
     "moment": "^2.18.1",
-    "ng2-eonasdan-datetimepicker": "0.0.7",
+    "ng-pick-datetime": "^4.3.0",
     "ngx-bootstrap": "^1.7.1",
     "num2fraction": "^1.2.2",
     "pretty-error": "^2.1.0",

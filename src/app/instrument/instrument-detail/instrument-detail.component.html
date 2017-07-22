@@ -63,9 +63,7 @@
                     [header]="header"
                     [editable]="true"
                     locale="zh-cn"
-
                     defaultView="agendaWeek"
-                    scrollTime="07:00:00"
                     nowIndicator="true"
                     (onEventClick)="handleEventClick($event)"
                     (onDayClick)="handleDayClick($event)"
@@ -78,17 +76,42 @@
                   [style]="{'overflow':'visible'}" [resizable]="false" >
           <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="event">
             <div class="ui-grid-row">
-              <div class="ui-grid-col-4"><label >Title</label></div>
-              <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="event.title" /></div>
+              <div class="ui-grid-col-4"><label >姓名</label></div>
+              <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="event.title" disabled /></div>
             </div>
             <div class="ui-grid-row">
-              <div class="ui-grid-col-4"><label >Start</label></div>
+              <div class="ui-grid-col-4"><label >开始时间</label></div>
               <!--<div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.start" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>-->
-              <div class="ui-grid-col-8"><input a2e-datetimepicker [date]="dateTo" [options]="a2eOptions"> <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div>
+              <div class="ui-grid-col-8"><input class="picker-input"
+                                                dateTimePicker
+                                                [value]="event.start | date:'yyyy-MM-dd | HH:mm'"
+                                                [(ngModel)]="event.start"
+                                                (onChange)="setStart($event)"
+                                                [mode]=" 'dropdown' "
+                                                [minMoment]="min_start"
+                                                [maxMoment]="max"
+                                                (onError)="DoWhateverFn($event)"
+                                                [pickerType]=" 'time' "
+                                                readonly
+              >
+              </div>
+
             </div>
             <div class="ui-grid-row">
-              <div class="ui-grid-col-4"><label >End</label></div>
-              <div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.end" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>
+              <div class="ui-grid-col-4"><label >结束时间</label></div>
+              <div class="ui-grid-col-8"><input class="picker-input"
+                                                dateTimePicker
+                                                [value]="event.end | date:'yyyy-MM-dd | HH:mm'"
+                                                [(ngModel)]="event.end"
+                                                (onChange)="setEnd($event)"
+                                                [mode]=" 'dropdown' "
+                                                [minMoment]="min_end"
+                                                [maxMoment]="max"
+                                                (onError)="DoWhateverFn($event)"
+                                                [pickerType]=" 'time' "
+                                                readonly
+              >
+              </div>
             </div>
             <!--<div class="ui-grid-row">-->
             <!--<div class="ui-grid-col-4"><label >All Day</label></div>-->
@@ -98,7 +121,7 @@
           <p-footer>
             <div class="ui-dialog-buttonpane ui-helper-clearfix">
               <button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete" [disabled]="!event?.id"></button>
-              <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start || !event?.end"></button>
+              <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start || !event?.end || !save_pass"></button>
             </div>
           </p-footer>
         </p-dialog>

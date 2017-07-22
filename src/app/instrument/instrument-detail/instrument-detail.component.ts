@@ -27,12 +27,14 @@ export class InstrumentDetailComponent implements OnInit{
 
   header:any;
   dialogVisible:boolean=false;
-  idGen:number=100;
 
   initReservations:Reservation[];
 
-  dateTo:moment.Moment;
-  a2eOptions;
+  min_start:any;
+  max:any;
+  min_end:any;
+
+  save_pass:boolean;
 
   constructor(
            private restService: LimsRestService,
@@ -43,12 +45,7 @@ export class InstrumentDetailComponent implements OnInit{
     this.myUser.last_name='赵';
     this.myUser.first_name='宇飞';
     this.selectedEvent = new ScheduleReservation();
-    this.dateTo = moment();
-    this.a2eOptions = {
-      format:'YYYY-MM-DDTHH:mm:ssZ'
-    }
   }
-  // todo 查calendar api,用bootstrap-timepicker
   ngOnInit() {
     this.header = {
       left: 'prev listWeek next today',
@@ -88,85 +85,68 @@ export class InstrumentDetailComponent implements OnInit{
         }
       )
   }
-
-  // start.stripTime().format()可以将日期转化成yyyy-mm-dd;
-  // wantDelete:boolean = false;
   handleDayClick(e){
     this.dialogVisible = true;
     this.event = new ScheduleReservation();
-    console.log('DayClick时，得到事件的开始时间格式，e.date|e.date.format()|e.date.stripTime():', e.date,'|',e.date.format(),'|',e.date.stripTime());
+    console.log('e',e);
     this.event.start = e.date.format();
+    this.event.end =  moment(this.event.start).add(2,'h').format('YYYY-MM-DDTHH:mm:ss');
     this.event.title = this.myUser.last_name+this.myUser.first_name;
     // this.cd.detectChanges()
-    console.log('DayClick的scheduleEvents：',this.scheduleEvents)
+    console.log('DayClick的scheduleEvents：',this.scheduleEvents);
+
+    const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    const reservationStartTime = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    const now_reservationStart_compare =this.isBefore(now_time,reservationStartTime);
+    this.min_start = now_reservationStart_compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    console.log('this.min_start:',this.min_start)
+    this.max = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
+    console.log('this.max:',this.max)
+    this.min_end = e.date.format('YYYY-MM-DD HH:mm:ss');
+    console.log('this.min_end:', this.min_end)
+
+    // const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
   }
-
   handleEventClick(e){
-    /***
-     * this.event用来显示弹出框的一份信息，event用来保存另一份信息到scheduleEvents(显示日程表的信息)
-     */
-    const event = new ScheduleReservation();
-    event.id = e.calEvent.id;
-    event.title = e.calEvent.title;
-    event.start = e.calEvent.start? e.calEvent.start.format() : null;
-    event.end = e.calEvent.end? e.calEvent.end.format() : null;
-    event.backgroundColor = 'black'; // todo:点击时显示不同的背景颜色.
-
+    this.dialogVisible = true;
     this.event = new ScheduleReservation();
     let start = e.calEvent.start;
     let end = e.calEvent.end;
-    this.event.start = start? start.stripTime().format(): null;
-    // this.event.end = end? end.stripTime().format(): null;
+    this.event.start = start? start.format(): null;
+    this.event.end = end? end.format(): start.add(2,'h').format();
     this.event.id = e.calEvent.id;
     this.event.title = e.calEvent.title;
-    this.dialogVisible = true;
-
-    if (event.id){
-      let index:number = this.findEventIndexById(event.id);
-      if (index >= 0){
-        console.log('eventclick, event:',event)
-        this.selectedEvent= event
-        this.scheduleEvents[index] = event;
-      }
-    }
     console.log('EventClick的scheduleEvents：',this.scheduleEvents)
-    console.log(this.event)
 
-    // if (confirm('确定删除此预约吗')){
-    //   console.log('删除预约的id：',e.calEvent.id)
-    // }
-    // this.event.id = e.calEvent.id;
-    // this.event = new ScheduleReservation();
-    // this.event.title = e.calEvent.title;
-    // let start = e.calEvent.start;
-    // let end = e.calEvent.end;
-    // if (end){
-    //   end.stripTime();
-    //   this.event.end = end.format();
-    //
-    // }
-    // if (start){
-    //   start.stripTime();
-    //   this.event.start = start.format();
-    // }
-    // // this.event.start = start.format(); // start.stripTime().format()可以将日期转化成yyyy-mm-dd；
-    // this.event.id = e.calEvent.id;
-    // // console.log('EventClick时，得到事件的开始时间格式，start.format():',start.format());
+    // 解决 当前时间和当天可预约时间，哪个作为预约的最小时间。
+// console.log('比较大小',this.isBefore(moment().format('YYYY-MM-DD HH:mm:ss'),start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time))
+    const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    const reservationStartTime = start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    const now_reservationStart_compare =this.isBefore(now_time,reservationStartTime);
+    this.min_start = now_reservationStart_compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    console.log('this.min_start:',this.min_start)
+    this.max = end.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
+    console.log('this.max:',this.max)
+    this.min_end = start.format('YYYY-MM-DD HH:mm:ss');
+    console.log('this.min_end:', this.min_end)
+
+    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
   }
-
   saveEvent(){
+
     //update
     if (this.event.id){
       let index:number = this.findEventIndexById(this.event.id);
       if (index >= 0){
         console.log('save，this.event:',this.event)
-        this.selectedEvent = this.event;
+        // this.selectedEvent = this.event;
         this.scheduleEvents[index] = this.event;
       }
     }
     //create
     else {
-      this.event.id = this.idGen++;  // todo id的设置问题，能否用UUID？
+      // this.event.id = this.idGen++;  // todo id的设置问题，能否用UUID？
       // this.selectedEvent = this.event;
       this.scheduleEvents.push(this.event);
       this.event = null;
@@ -185,29 +165,24 @@ export class InstrumentDetailComponent implements OnInit{
     console.log('delete的scheduleEvents：',this.selectedEvent,this.scheduleEvents)
   }
   handleDragResize(e){
-    /**
-     * 1 当点击事件的时候，必然是在弹出预约框的基础上，已经有this.event.id;
-     * 2 当拖动的时候，已经有e.event.id;
-     * todo:
-     */
     console.log(this.scheduleEvents)
     this.selectedEvent = new ScheduleReservation();
-    console.log('e:',e)
-      let event = new ScheduleReservation();
+    console.log('e:',e.event.id)
+      this.event = new ScheduleReservation();
 
-      event.id = e.event.id;
-      event.title = e.event.title;
+      this.event.id = e.event.id?e.event.id:null;
+      this.event.title = e.event.title;
       let start = e.event.start;
       let end = e.event.end;
       console.log('start:',start, 'end:',end)
-      event.start =start? start.format() : null;
-      event.end =end? end.format() : null;
-      this.selectedEvent = event;
+      this.event.start = start? start.format(): null;
+      this.event.end = end? end.format(): start.add(2,'h').format();
+      // this.selectedEvent = event;
 
-      let index:number = this.findEventIndexById(e.event.id);
-      if (index >= 0){
-        this.scheduleEvents[index] = event;
-      }
+      // let index:number = this.findEventIndexById(e.event.id);
+      // if (index >= 0){
+      //   this.scheduleEvents[index] = this.event;
+      // }
       console.log('拖动的scheduleEvents：',this.scheduleEvents)
   }
   findEventIndexById(id:number){
@@ -220,7 +195,38 @@ export class InstrumentDetailComponent implements OnInit{
     }
     return index;
   }
-// todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。应用Subject
+
+  // todo delete the former reservation; // todo 设置删除模式
+
+  DoWhateverFn(e){
+    console.log('dowhateverFn:',e)
+  }
+  setStart(e){
+    // set the start time when pick the time
+    this.event.start = moment(e).format('YYYY-MM-DDTHH:mm:ss')
+    console.log(moment(e).format('YYYY-MM-DDTHH:mm:ss'))
+    this.min_end = moment(e).format('YYYY-MM-DD HH:mm:ss');
+    console.log('this.min_end:', this.min_end);
+
+    const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end)
+  }
+  setEnd(e){
+    // set the end time when pick the time
+    this.event.end = moment(e).format('YYYY-MM-DDTHH:mm:ss')
+    console.log(moment(e).format('YYYY-MM-DDTHH:mm:ss'))
+
+    const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
+  }
+  isBefore(one,another){
+    let pass = moment(one).isBefore(another);
+    console.log('pass is',pass)
+    return pass ? pass : false;
+  }
+
+
+  // todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。应用Subject
   reserve(){
     if (!this.selectedEvent){
       alert('请选择您要修改的预约或创建新的预约')
@@ -266,10 +272,5 @@ export class InstrumentDetailComponent implements OnInit{
       }
     }
   }
-  // todo delete the former reservation; // todo 设置删除模式
-  deleteReservation(){
-
-  }
-
 }
-// todo:预约冲突，颜色区分，
+// todo:预约冲突，颜色区分，错误信息提示,拖动时候时间转换；
