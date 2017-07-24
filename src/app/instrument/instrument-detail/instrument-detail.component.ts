@@ -117,20 +117,21 @@ export class InstrumentDetailComponent implements OnInit{
     console.log('DayClick的scheduleEvents：',this.scheduleEvents);
 
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    // const reservationStartTime = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
-    // const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
-    // this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
-    // console.log('this.min_start:',this.min_start)
+    const reservationStartTime = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
+    this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    console.log('this.min_start:',this.min_start)
     this.max = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
     // console.log('this.max:',this.max)
     this.min_end = e.date.format('YYYY-MM-DD HH:mm:ss');
     // console.log('this.min_end:', this.min_end)
-    this.min_start = this.now_reservation_Compare(e.date).min_start;
+    // this.min_start = this.now_reservation_Compare(e.date).min_start;
 
 
     // const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
     this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
   }
+  //todo: 对已存在的事件，点击进行换时间会造成冲突
   handleEventClick(e){
     this.dialogVisible = true;
     this.event = new ScheduleReservation();
@@ -144,16 +145,15 @@ export class InstrumentDetailComponent implements OnInit{
 
     // 解决 当前时间和当天可预约时间，哪个作为预约的最小时间。
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    // const reservationStartTime = start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
-    // const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
-    // this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
-    // console.log('this.min_start:',this.min_start)
+    const reservationStartTime = start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
+    this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    console.log('this.min_start:',this.min_start)
     this.max = end.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
     // console.log('this.max:',this.max)
     this.min_end = start.format('YYYY-MM-DD HH:mm:ss');
     // console.log('this.min_end:', this.min_end)
-    this.min_start = this.now_reservation_Compare(start).min_start;
-    // this.max = this.now_reservation_Compare(end).max;
+
     // this.min_end = this.now_reservation_Compare(e.date).min_end;
 
     this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
@@ -164,7 +164,7 @@ export class InstrumentDetailComponent implements OnInit{
     if (this.isConflicting){
       alert('时间冲突，请检查')
     }
-    else {
+    else if (!this.isConflicting){
       //update
       if (this.event.id){
         let index:number = this.findEventIndexById(this.event.id);
@@ -178,10 +178,10 @@ export class InstrumentDetailComponent implements OnInit{
         // this.event.id = this.idGen++;
         // this.selectedEvent = this.event;
         this.scheduleEvents.push(this.event);
-        this.dialogVisible=false;
+
       }
     }
-
+    this.dialogVisible=false;
     console.log('save的scheduleEvents：',this.scheduleEvents)
     console.log(this.event)
     console.log('save  isConflicting:',this.isConflicting)
@@ -274,7 +274,7 @@ export class InstrumentDetailComponent implements OnInit{
         const start=moment(this.scheduleEvents[i].start);
         const end=moment(this.scheduleEvents[i].end);
         if (startT.isSame(start,'d') && endT.isSame(end,'d')){
-          if (startT.isSame(start) && endT.isSame(end) ){
+          if (startT.isSame(start) || endT.isSame(end) ){
             console.log('检查冲突中循环到了自己');
           }
           else if(startT.isBetween(start,end) || endT.isBetween(start,end) || start.isBetween(startT,endT) || end.isBetween(startT,endT)){
@@ -282,7 +282,7 @@ export class InstrumentDetailComponent implements OnInit{
           }
           else  {
             console.log('内层判断 不冲突');
-
+            return false;
           }
         }
         else {
