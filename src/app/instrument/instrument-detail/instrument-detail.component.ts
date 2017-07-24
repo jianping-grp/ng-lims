@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Instrument} from '../../models/instrument';
 import {ActivatedRoute, Params} from '@angular/router';
 import 'rxjs/add/operator/switchMap';
@@ -30,11 +30,18 @@ export class InstrumentDetailComponent implements OnInit{
 
   initReservations:Reservation[];
 
+  // timepicker
   min_start:any;
   max:any;
   min_end:any;
 
-  save_pass:boolean;
+  //schedule
+  min_sche:any;
+  max_sche:any;
+  event_Constraint:any;
+
+  isSaved:boolean;
+  isConflicting:boolean;
 
   constructor(
            private restService: LimsRestService,
@@ -45,7 +52,10 @@ export class InstrumentDetailComponent implements OnInit{
     this.myUser.last_name='赵';
     this.myUser.first_name='宇飞';
     this.selectedEvent = new ScheduleReservation();
+    console.log('moment()为null:',moment(null).isSame('2017-10-10','day'))
+
   }
+
   ngOnInit() {
     this.header = {
       left: 'prev listWeek next today',
@@ -54,7 +64,10 @@ export class InstrumentDetailComponent implements OnInit{
     };
     this.activatedRoute.params
     // (+) converts string 'id' to a number
-      .subscribe((params: Params) => this.getInstrument(+params['id']));
+      .subscribe(
+        (params: Params) => this.getInstrument(+params['id']),
+        (err:Error)=>console.log(err)
+      );
   }
   getInstrument(id: number) {
     this.restService.getInstrument(id)
@@ -64,7 +77,15 @@ export class InstrumentDetailComponent implements OnInit{
           this.instrument = instrument;
           this.getReservation(this.instrument.id);
         },
-        error => this.errorMsg = error
+        error => this.errorMsg = error,
+        ()=>{
+          this.min_sche = this.instrument.reservation_start_time? this.instrument.reservation_start_time : '00:00';
+          this.max_sche = this.instrument.reservation_end_time ? this.instrument.reservation_end_time : '23:59';
+          this.event_Constraint = {
+            start: this.min_sche,
+            end: this.max_sche
+          }
+        }
       );
   }
   getReservation(instrumentId: number) {
@@ -96,17 +117,19 @@ export class InstrumentDetailComponent implements OnInit{
     console.log('DayClick的scheduleEvents：',this.scheduleEvents);
 
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    const reservationStartTime = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
-    const now_reservationStart_compare =this.isBefore(now_time,reservationStartTime);
-    this.min_start = now_reservationStart_compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
-    console.log('this.min_start:',this.min_start)
+    // const reservationStartTime = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    // const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
+    // this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    // console.log('this.min_start:',this.min_start)
     this.max = e.date.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
-    console.log('this.max:',this.max)
+    // console.log('this.max:',this.max)
     this.min_end = e.date.format('YYYY-MM-DD HH:mm:ss');
-    console.log('this.min_end:', this.min_end)
+    // console.log('this.min_end:', this.min_end)
+    this.min_start = this.now_reservation_Compare(e.date).min_start;
+
 
     // const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
+    this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
   }
   handleEventClick(e){
     this.dialogVisible = true;
@@ -120,40 +143,49 @@ export class InstrumentDetailComponent implements OnInit{
     console.log('EventClick的scheduleEvents：',this.scheduleEvents)
 
     // 解决 当前时间和当天可预约时间，哪个作为预约的最小时间。
-// console.log('比较大小',this.isBefore(moment().format('YYYY-MM-DD HH:mm:ss'),start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time))
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    const reservationStartTime = start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
-    const now_reservationStart_compare =this.isBefore(now_time,reservationStartTime);
-    this.min_start = now_reservationStart_compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
-    console.log('this.min_start:',this.min_start)
+    // const reservationStartTime = start.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    // const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
+    // this.min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    // console.log('this.min_start:',this.min_start)
     this.max = end.format('YYYY-MM-DD ')+this.instrument.reservation_end_time;
-    console.log('this.max:',this.max)
+    // console.log('this.max:',this.max)
     this.min_end = start.format('YYYY-MM-DD HH:mm:ss');
-    console.log('this.min_end:', this.min_end)
+    // console.log('this.min_end:', this.min_end)
+    this.min_start = this.now_reservation_Compare(start).min_start;
+    // this.max = this.now_reservation_Compare(end).max;
+    // this.min_end = this.now_reservation_Compare(e.date).min_end;
 
-    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
+    this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
   }
   saveEvent(){
+    this.isConflicting = this.isBetween(moment(this.event.start),moment(this.event.end));
 
-    //update
-    if (this.event.id){
-      let index:number = this.findEventIndexById(this.event.id);
-      if (index >= 0){
-        console.log('save，this.event:',this.event)
+    if (this.isConflicting){
+      alert('时间冲突，请检查')
+    }
+    else {
+      //update
+      if (this.event.id){
+        let index:number = this.findEventIndexById(this.event.id);
+        if (index >= 0){
+          // this.selectedEvent = this.event;
+          this.scheduleEvents[index] = this.event;
+        }
+      }
+      //create
+      else {
+        // this.event.id = this.idGen++;
         // this.selectedEvent = this.event;
-        this.scheduleEvents[index] = this.event;
+        this.scheduleEvents.push(this.event);
+        this.dialogVisible=false;
       }
     }
-    //create
-    else {
-      // this.event.id = this.idGen++;  // todo id的设置问题，能否用UUID？
-      // this.selectedEvent = this.event;
-      this.scheduleEvents.push(this.event);
-      this.event = null;
-    }
 
-    this.dialogVisible=false;
     console.log('save的scheduleEvents：',this.scheduleEvents)
+    console.log(this.event)
+    console.log('save  isConflicting:',this.isConflicting)
+
   }
   deleteEvent(){
     let index:number = this.findEventIndexById(this.event.id);
@@ -164,28 +196,23 @@ export class InstrumentDetailComponent implements OnInit{
     this.dialogVisible = false;
     console.log('delete的scheduleEvents：',this.selectedEvent,this.scheduleEvents)
   }
+
   handleDragResize(e){
-    console.log(this.scheduleEvents)
-    this.selectedEvent = new ScheduleReservation();
-    console.log('e:',e.event.id)
-      this.event = new ScheduleReservation();
+    // this.selectedEvent = new ScheduleReservation();
+    this.event = new ScheduleReservation();
+    this.event.id = e.event.id?e.event.id:null;
+    this.event.title = e.event.title;
+    let start = e.event.start;
+    let end = e.event.end;
+    this.event.start = start? start.format(): null;
+    this.event.end = end? end.format(): start.add(2,'h').format();
+    console.log(this.event_Constraint)
 
-      this.event.id = e.event.id?e.event.id:null;
-      this.event.title = e.event.title;
-      let start = e.event.start;
-      let end = e.event.end;
-      console.log('start:',start, 'end:',end)
-      this.event.start = start? start.format(): null;
-      this.event.end = end? end.format(): start.add(2,'h').format();
-      // this.selectedEvent = event;
+    console.log('拖动的scheduleEvents：',this.scheduleEvents)
 
-      // let index:number = this.findEventIndexById(e.event.id);
-      // if (index >= 0){
-      //   this.scheduleEvents[index] = this.event;
-      // }
-      console.log('拖动的scheduleEvents：',this.scheduleEvents)
   }
   findEventIndexById(id:number){
+
     let index = -1;
     for (let i = 0;i<this.scheduleEvents.length;i++){
       if (id == this.scheduleEvents[i].id){
@@ -208,8 +235,11 @@ export class InstrumentDetailComponent implements OnInit{
     this.min_end = moment(e).format('YYYY-MM-DD HH:mm:ss');
     console.log('this.min_end:', this.min_end);
 
+    // 是否禁用save
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end)
+    this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end)
+
+    // 是否预约时间冲突
   }
   setEnd(e){
     // set the end time when pick the time
@@ -217,14 +247,69 @@ export class InstrumentDetailComponent implements OnInit{
     console.log(moment(e).format('YYYY-MM-DDTHH:mm:ss'))
 
     const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
-    this.save_pass = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
+    this.isSaved = this.isBefore(this.event.start,this.event.end) && this.isBefore(now_time,this.event.end);
+
   }
   isBefore(one,another){
     let pass = moment(one).isBefore(another);
     console.log('pass is',pass)
     return pass ? pass : false;
   }
+  // 当前时间和选择日预约时间的比较方法;
+  now_reservation_Compare(time_Compared:moment.Moment){
+    const now_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    const reservationStartTime = time_Compared.format('YYYY-MM-DD ')+this.instrument.reservation_start_time;
+    const now_reservationStart_Compare =this.isBefore(now_time,reservationStartTime);
+    const min_start = now_reservationStart_Compare ?  reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
+    console.log('this.min_start:',min_start);
+    return {
+      min_start: min_start
+    }
+  }
+  // 处理预约时间冲突;
+  isBetween(startT?:moment.Moment,endT?:moment.Moment){
+    // todo:可提前几周预约，每次最少预约的时间；如何防止预约次数过多，导致遍历时间复杂度过大。
+    if (this.scheduleEvents.length <= 100){
+      for (let i = 0; i<this.scheduleEvents.length;i++){
+        const start=moment(this.scheduleEvents[i].start);
+        const end=moment(this.scheduleEvents[i].end);
+        if (startT.isSame(start,'d') && endT.isSame(end,'d')){
+          if (startT.isSame(start) && endT.isSame(end) ){
+            console.log('检查冲突中循环到了自己');
+          }
+          else if(startT.isBetween(start,end) || endT.isBetween(start,end) || start.isBetween(startT,endT) || end.isBetween(startT,endT)){
+            return true;
+          }
+          else  {
+            console.log('内层判断 不冲突');
 
+          }
+        }
+        else {
+          console.log('外层判断 不冲突');
+        }
+      }
+    }
+    // else {
+    //   for (let i = this.scheduleEvents.length-100; i<this.scheduleEvents.length;i++){
+    //     const start=this.scheduleEvents[i].start;
+    //     const end=this.scheduleEvents[i].end;
+    //     if (moment(startT).isSame(start,'d') || moment(endT).isSame(end,'d')){
+    //       if (moment(startT).isBetween(start,end) || moment(endT).isBetween(start,end) ){
+    //         alert('预约时间冲突');
+    //         return true;
+    //       }
+    //       else  {
+    //         console.log('内错误')
+    //         return false;
+    //       }
+    //     }
+    //     else {
+    //       console.log('外层错误')
+    //     }
+    //   }
+    // }
+  }
 
   // todo 现在实现了scheduleEvents换成新的,下面做向后台发送的。应用Subject
   reserve(){
@@ -273,4 +358,4 @@ export class InstrumentDetailComponent implements OnInit{
     }
   }
 }
-// todo:预约冲突，颜色区分，错误信息提示,拖动时候时间转换；
+// todo:颜色区分，错误信息提示；

@@ -62,6 +62,8 @@
         <p-schedule [events]="scheduleEvents"
                     [header]="header"
                     [editable]="true"
+                    [eventOverlap]="false"
+                    [eventConstraint]="event_Constraint"
                     locale="zh-cn"
                     defaultView="agendaWeek"
                     nowIndicator="true"
@@ -82,7 +84,8 @@
             <div class="ui-grid-row">
               <div class="ui-grid-col-4"><label >开始时间</label></div>
               <!--<div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.start" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>-->
-              <div class="ui-grid-col-8"><input class="picker-input"
+              <div class="ui-grid-col-8">
+                <input class="picker-input"
                                                 dateTimePicker
                                                 [value]="event.start | date:'yyyy-MM-dd | HH:mm'"
                                                 [(ngModel)]="event.start"
@@ -99,7 +102,8 @@
             </div>
             <div class="ui-grid-row">
               <div class="ui-grid-col-4"><label >结束时间</label></div>
-              <div class="ui-grid-col-8"><input class="picker-input"
+              <div class="ui-grid-col-8">
+                <input class="picker-input"
                                                 dateTimePicker
                                                 [value]="event.end | date:'yyyy-MM-dd | HH:mm'"
                                                 [(ngModel)]="event.end"
@@ -121,7 +125,7 @@
           <p-footer>
             <div class="ui-dialog-buttonpane ui-helper-clearfix">
               <button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete" [disabled]="!event?.id"></button>
-              <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start || !event?.end || !save_pass"></button>
+              <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save" [disabled]="!event?.start || !event?.end || !isSaved"></button>
             </div>
           </p-footer>
         </p-dialog>

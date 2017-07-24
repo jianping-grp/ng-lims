@@ -28,7 +28,7 @@ import {DateTimePickerModule} from 'ng-pick-datetime';
     TabViewModule,
     CodeHighlighterModule,
     InstrumentRoutingModule,
-    DateTimePickerModule
+    DateTimePickerModule,
   ],
   declarations: [
     InstrumentComponent,
