@@ -189,9 +189,6 @@ export class InstrumentDetailComponent implements OnInit {
     this.isConflicting = null;
     this.dialogVisible = false;
     console.log('save的scheduleEvents：', this.scheduleEvents)
-    console.log(this.event)
-    console.log('save  isConflicting:', this.isConflicting)
-
   }
 
   deleteEvent() {

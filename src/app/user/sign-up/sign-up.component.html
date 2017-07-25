@@ -1,59 +1,78 @@
-<form class="form-horizontal well-lg" [formGroup]="signUpForm" (ngSubmit)="signUp()">
+<form class="form-horizontal well-lg" [formGroup]="signUpForm" novalidate>
   <div class="page-header">
-    <h5>欢迎注册使用TJAB仪器管理平台</h5>
+    <h4>欢迎注册使用TJAB仪器管理平台</h4>
   </div>
   <div class="well">
     <div class="form-group">
       <label for="username" class="col-lg-3 control-label">用户名:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="text" name="username" id="username" [formControl]="username">
+        <input class="input-lg" type="text" name="username" id="username" formControlName="username" placeholder="请输入用户名">
+        <span *ngIf="formErrors.username" class="alert alert-danger">{{formErrors.username}}</span>
+        <span *ngIf="signUpForm.get('username').valid" class="glyphicon glyphicon-ok"></span>
       </div>
     </div>
-    <div class="form-group">
-      <label for="password" class="col-lg-3 control-label">密 码:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="password" name="password" id="password" [formControl]="password">
+
+    <div formGroupName="passwordgrp">
+      <div class="form-group">
+        <label class="col-lg-3 control-label" for="password">密 码:</label>
+        <div class="col-lg-9">
+          <input class="input-lg" type="password" id="password" formControlName="password" placeholder="请输入密码">
+          <span *ngIf="formErrors['passwordgrp.password']" class="alert alert-danger">{{formErrors['passwordgrp.password']}}</span>
+          <span *ngIf="signUpForm.get('passwordgrp.password').valid" class="glyphicon glyphicon-ok"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-lg-3 control-label" for="confirm">确认密码:</label>
+        <div class="col-lg-9">
+          <input class="input-lg" type="password" id="confirm" formControlName="confirm" placeholder="请再次输入密码">
+          <span *ngIf="formErrors['passwordgrp.confirm']" class="alert alert-danger">{{formErrors['passwordgrp.confirm']}}</span>
+          <span *ngIf="formErrors.passwordgrp && (!formErrors['passwordgrp.confirm'] && !formErrors['passwordgrp.password'])" class="alert alert-danger">
+            {{formErrors.passwordgrp}}
+          </span>
+          <span *ngIf="signUpForm.get('passwordgrp.confirm').valid && signUpForm.get('passwordgrp').valid" class="glyphicon glyphicon-ok"></span>
+        </div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="confirmPassword" class="col-lg-3 control-label">确认密码:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="password" name="confirmPassword" id="confirmPassword"
-               [formControl]="confirmPassword">
-        <small class="alert alert-warning" *ngIf="signUpForm.controls.confirmPassword?.errors?.notEquivalent">
-          密码不一致，请重新输入。
-        </small>
-      </div>
-    </div>
+
     <div class="form-group">
       <label for="lastname" class="col-lg-3 control-label">姓 氏:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="text" name="lastname" id="lastname" [formControl]="lastname">
+        <input class="input-lg" type="text" name="lastname" id="lastname" formControlName="lastname" placeholder="请输入您的姓氏">
+        <span *ngIf="formErrors.lastname" class="alert alert-danger">{{formErrors.lastname}}</span>
+        <span *ngIf="signUpForm.get('lastname').valid" class="glyphicon glyphicon-ok"></span>
       </div>
     </div>
     <div class="form-group">
       <label for="firstname" class="col-lg-3 control-label">名 字:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="text" name="firstname" id="firstname" [formControl]="firstname">
+        <input class="input-lg" type="text" name="firstname" id="firstname" formControlName="firstname" placeholder="请输入您的名字">
+        <span *ngIf="formErrors.firstname" class="alert alert-danger">{{formErrors.firstname}}</span>
+        <span *ngIf="signUpForm.get('firstname').valid" class="glyphicon glyphicon-ok"></span>
       </div>
     </div>
     <div class="form-group">
       <label for="email" class="col-lg-3 control-label">邮 箱:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="email" name="email" id="email" [formControl]="email">
+        <input class="input-lg" type="email" name="email" id="email" formControlName="email" placeholder="请输入您的常用邮箱">
+        <span *ngIf="formErrors.email" class="alert alert-danger">{{formErrors.email}}</span>
+        <span *ngIf="signUpForm.get('email').valid" class="glyphicon glyphicon-ok"></span>
       </div>
     </div>
     <div class="form-group">
       <label for="phone" class="col-lg-3 control-label">电 话:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="text" name="phone" id="phone" [formControl]="password">
+        <input class="input-lg" name="phone" id="phone" formControlName="phone" placeholder="请输入您的电话号码">
+        <span *ngIf="formErrors.phone" class="alert alert-danger">{{formErrors.phone}}</span>
+        <span *ngIf="signUpForm.get('phone').valid" class="glyphicon glyphicon-ok"></span>
       </div>
     </div>
     <div class="form-group">
       <div class="col-lg-9 col-lg-offset-3">
         <button class="btn btn-warning" type="reset">重 置</button>
-        <button class="btn btn-default" type="submit">注 册</button>
+        <button class="btn btn-primary" type="submit" [disabled]="!signUpForm.valid">注 册</button>
       </div>
     </div>
   </div>
 </form>
+<!--<p>Form:{{signUpForm.value | json}}</p>-->
+<!--<p>Form status:{{signUpForm.get('passwordgrp.password').valid}}</p>-->

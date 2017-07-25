@@ -1,62 +1,117 @@
-import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validator, Validators} from "@angular/forms";
-import {PasswordValidation} from "../password-validation";
+import { Component} from '@angular/core';
+import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
+
+function passwordMatcher(c:AbstractControl){
+  if (!c.get('password') || !c.get('confirm'))return null;
+  if (c.get('password') && c.get('confirm')){
+    return c.get('confirm').value === c.get('password').value ? null : {'nomatch':true}
+  }
+  return null
+}
 
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.css']
 })
-export class SignUpComponent implements OnInit {
-  username = new FormControl('', [
-    Validators.required,
-    Validators.minLength(6)
-  ]);
-  password = new FormControl('', [
-    Validators.required,
-    Validators.minLength(8)
-  ]);
-  confirmPassword = new FormControl('', [Validators.required]);
-  firstname = new FormControl('');
-  lastname = new FormControl('');
-  email = new FormControl('', [
-    Validators.required,
-    Validators.email
-  ]);
-  phone = new FormControl('');
+export class SignUpComponent{
+  signUpForm:FormGroup;
 
-  constructor(private  formBuilder: FormBuilder) { }
+  constructor(
+    private fb: FormBuilder
+  ) {
+    this.signUpForm = this.fb.group({
+      username: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(12)
+      ]],
+      passwordgrp: this.fb.group({
+        password: ['', [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(12)
+        ]],
+        confirm: ['', [
+          Validators.required
+        ]]
+      }, {validator: passwordMatcher}),
+      lastname: ['',Validators.required],
+      firstname: ['',Validators.required],
+      email: ['', [
+        Validators.required,
+        Validators.email
+      ]],
+      phone: ['',[
+        Validators.required,
+        Validators.maxLength(11),
+        Validators.minLength(11)
+      ]]
 
-  signUpForm: FormGroup = this.formBuilder.group({
-    username: this.username,
-    password: this.password,
-    confirmPassword: this.confirmPassword,
-    firstname: this.firstname,
-    lastname: this.lastname,
-    email: this.email,
-    phone: this.phone
-
-  }, {
-    validator: this.checkIfMatching('password', 'confirmPassword')
-  })
-
-  ngOnInit() {
+    });
+    this.signUpForm.valueChanges.subscribe(data=>this.onValueChanged(data));
+    this.onValueChanged();
   }
 
-  signUp(){
-    console.log(`${this.username.value} signed up.`)
-  }
+  onValueChanged(data?:any){
+    if (!this.signUpForm) return;
+    const form = this.signUpForm;
 
-  checkIfMatching(firstField: string, secondField: string) {
-    return (group: FormGroup) => {
-      let firstInput = group.controls[firstField],
-        secondInput = group.controls[secondField];
-      if (firstInput.value !== secondInput.value) {
-        return secondInput.setErrors({notEquivalent: true})
-      }
-      else {
-        return secondInput.setErrors(null);
+    for (let field in this.formErrors){
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      let control = form.get(field);
+
+      if (control && control.dirty && !control.valid){
+        const messages = this.validationMessages[field];
+        for (let key in control.errors){
+          this.formErrors[field] += messages[key] + '';
+        }
       }
     }
+  }
+
+  formErrors={
+    'username':'',
+    'passwordgrp.password':'',
+    'passwordgrp.confirm':'',
+    'passwordgrp':'',
+    'lastname':'',
+    'firstname':'',
+    'email':'',
+    'phone':''
+  }
+  validationMessages = {
+    'username':{
+      'required':'必填项;',
+      'minlength':'用户名至少是6位字符;',
+      'maxlength':'用户名最多是12位字符;'
+    },
+    'passwordgrp.password':{
+      'required':'必填项;',
+      'minlength':'密码至少为6位;',
+      'maxlength':'密码最多为12位;'
+    },
+    'passwordgrp.confirm':{
+      'required':'必填项;',
+    },
+    'passwordgrp':{
+      'nomatch':'请再次确认您两次输入密码一致;'
+    },
+    'lastname':{
+      'required':'必填项;'
+    },
+    'firstname':{
+      'required':'必填项;'
+    },
+    'email':{
+      'required':'必填项;',
+      'email':'必须是包含@的邮件格式'
+    },
+    'phone':{
+      'required':'必填项;',
+      'minlength':'必须是11位手机号码;',
+      'maxlength':'必须是11位手机号码;'
+    },
   }
 }
