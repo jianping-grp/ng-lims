@@ -1,13 +1,15 @@
 .instrument_image {
-    width: 95%;
-}
-th {
-    min-width: 85px;
+  width: 95%;
 }
 
-.schedule{
-    margin-bottom: 50px;
+th {
+  min-width: 85px;
 }
+
+.schedule {
+  margin-bottom: 50px;
+}
+
 .ui-grid-row div {
   padding: 4px 10px
 }
