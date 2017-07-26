@@ -1,4 +1,4 @@
-<form class="form-horizontal well-lg" [formGroup]="signUpForm" novalidate>
+<form class="form-horizontal well-lg" [formGroup]="signUpForm" (ngSubmit)="signupSubmit()" novalidate>
   <div class="page-header">
     <h4>欢迎注册使用TJAB仪器管理平台</h4>
   </div>
@@ -68,8 +68,8 @@
     </div>
     <div class="form-group">
       <div class="col-lg-9 col-lg-offset-3">
-        <button class="btn btn-warning" type="reset">重 置</button>
-        <button class="btn btn-primary" type="submit" [disabled]="!signUpForm.valid">注 册</button>
+        <input class="btn btn-warning" type="reset" value="重 置"/>
+        <input class="btn btn-primary" type="submit" value="注 册" />
       </div>
     </div>
   </div>

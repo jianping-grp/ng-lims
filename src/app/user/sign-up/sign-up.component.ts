@@ -113,5 +113,11 @@ export class SignUpComponent{
       'minlength':'必须是11位手机号码;',
       'maxlength':'必须是11位手机号码;'
     },
+  };
+
+  signupSubmit(){
+    console.log('提交')
   }
+
+
 }

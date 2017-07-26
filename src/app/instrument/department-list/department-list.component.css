@@ -7,3 +7,6 @@ li.selected{
 .panel-body{
     padding: 15px 0px 15px 0px;
 }
+.panel-heading{
+  background-color: #66afe9;
+}

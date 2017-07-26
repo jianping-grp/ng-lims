@@ -12,3 +12,10 @@ h3 {
 .card-body {
     height: 150px;
 }
+
+.panel-heading{
+  background-color: #66afe9;
+}
+.panel-heading .panel-title{
+  color: #ffffff;
+}
