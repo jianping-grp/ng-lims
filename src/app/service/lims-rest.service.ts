@@ -10,16 +10,28 @@ import 'rxjs/add/operator/catch';
 
 @Injectable()
 export class LimsRestService {
-  private restUrl = 'http://localhost:8000/api'
+  private restUrl = 'http://localhost:8080/api'
   private headers = new Headers({'Content-Type': 'application/json'})
   constructor(
     private http: Http
   ) {
   }
 
-  private fetchData(url: String): any {
+  private fetchData(url: string){
     return this.http.get(`${this.restUrl}/${url}`);
   }
+
+  modifyReservation(reservationId: number,body:any){
+    return this.http.put(`${this.restUrl}/reservation/${reservationId}`,body)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+  createReservation(body:any){
+    return this.http.post(`${this.restUrl}/reservation`,body)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
 
   getDepartmentList(): Observable<Department[]> {
     return this.fetchData('department')

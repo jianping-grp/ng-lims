@@ -17,3 +17,11 @@ th {
 .ui-grid-row div label {
   font-weight: bold;
 }
+.panel-heading{
+  background-color: #66afe9;
+  color: #ffffff;
+}
+
+.ui-grid-row{
+  margin: 10px;
+}

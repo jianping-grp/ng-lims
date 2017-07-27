@@ -10,3 +10,8 @@ li.selected{
 .panel-heading{
   background-color: #66afe9;
 }
+
+ul li a:hover{
+  background-color: #66afe9;
+  color: #ffffff;
+}

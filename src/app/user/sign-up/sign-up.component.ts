@@ -115,9 +115,10 @@ export class SignUpComponent{
     },
   };
 
-  signupSubmit(){
-    console.log('提交')
+  onSubmit(){
+    console.log('signupForm:',this.signUpForm.value)
   }
+
 
 
 }
