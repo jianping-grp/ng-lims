@@ -25,21 +25,19 @@ export class InstrumentDetailComponent implements OnInit {
   header: any;
   dialogVisible: boolean = false;
   businessHours:any;
+
   // timepicker
-  min_start: any;
-  max: any;
-  min_end: any;
   reservationStartTime:any;
   reservationEndTime:any;
 
-  //schedule
+  // schedule
   min_sche: any;
   max_sche: any;
   event_Constraint: any;
 
   isSaved: boolean;
   isConflicting: boolean;
-  errorStatus:any;
+  errorsStatus:any[];
 
   constructor(
     private restService: LimsRestService,
@@ -85,8 +83,8 @@ export class InstrumentDetailComponent implements OnInit {
           };
           this.businessHours = {
             dow: [0,1,2,3,4,5,6],
-            start: this.instrument.reservation_start_time,
-            end: this.instrument.reservation_end_time
+            start: this.min_sche,
+            end: this.max_sche
           }
         }
       );
@@ -243,11 +241,6 @@ export class InstrumentDetailComponent implements OnInit {
 
   // todo delete the former reservation; // todo 设置删除模式
 
-  DoWhateverFn(e) {
-    // this.isSaved = false;
-    console.log('dowhateverFn:', e)
-  }
-
   setStart(e) {
     // set the start time when pick the time
     this.event.start = moment(e).format('YYYY-MM-DDTHH:mm:ss');
@@ -312,13 +305,13 @@ export class InstrumentDetailComponent implements OnInit {
   }
 
   errorStatusInfo(now_time:any){
-    // 这四条验证信息必须对应判断this.isSaved这四条。
-    return this.errorStatus = {
-      first:{status:this.isBefore(this.event.start, this.event.end),message:'起始时间必须小于结束时间'},
-      second:{status:this.isBefore(now_time, this.event.end),message:'结束时间必须在当前时间之后'},
-      third:{status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:`起始时间不得早于${this.instrument.reservation_start_time}`},
-      four:{status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:`结束时间不得晚于${this.instrument.reservation_end_time}`}
-    }
+    // 这些验证信息必须对应判断this.isSaved的信息。
+    return this.errorsStatus = [
+      {status:this.isBefore(this.event.start, this.event.end),message:'起始时间须早于结束时间'},
+      {status:this.isBefore(now_time, this.event.end),message:'结束时间须晚于当前时间'},
+      {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:`起始时间不得早于${this.min_sche}`},
+      {status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:`结束时间不得晚于${this.max_sche}`}
+    ]
   }
 
   // ErrorMessages = {
