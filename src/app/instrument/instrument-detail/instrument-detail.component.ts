@@ -38,6 +38,7 @@ export class InstrumentDetailComponent implements OnInit {
   isSaved: boolean;
   isConflicting: boolean;
   errorsStatus:any[];
+  daSchedule:boolean = false;
 
   constructor(
     private restService: LimsRestService,
@@ -304,7 +305,7 @@ export class InstrumentDetailComponent implements OnInit {
     console.log(this.isConflicting)
   }
 
-  errorStatusInfo(now_time:any){
+  errorStatusInfo(now_time:any):any[]{
     // 这些验证信息必须对应判断this.isSaved的信息。
     return this.errorsStatus = [
       {status:this.isBefore(this.event.start, this.event.end),message:'起始时间须早于结束时间'},
@@ -314,6 +315,9 @@ export class InstrumentDetailComponent implements OnInit {
     ]
   }
 
+  toggle():void{
+    this.daSchedule = !this.daSchedule;
+  }
 }
 
 // todo:颜色区分，错误信息提示；

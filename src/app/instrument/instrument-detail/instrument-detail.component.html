@@ -53,11 +53,19 @@
             <th>配件明细:</th>
             <td>{{instrument.accessories}}</td>
           </tr>
-
         </table>
+        <div class="pull-right" *ngIf="!daSchedule; else daTep">
+          <button class="btn btn-warning" (click)="toggle()">切换分析表</button>
+        </div>
+        <ng-template #daTep>
+          <div class="pull-right">
+            <button class="btn btn-warning" (click)="toggle()">切换日程表</button>
+          </div>
+        </ng-template>
       </div>
     </div>
-    <div class="row schedule">
+
+    <div class="row schedule" *ngIf="!daSchedule">
       <div class="content-section implementation">
         <p-schedule [events]="scheduleEvents"
                     [header]="header"
@@ -140,7 +148,9 @@
           </p-footer>
         </p-dialog>
       </div>
-
+    </div>
+    <div *ngIf="daSchedule">
+      <da-schedule></da-schedule>
     </div>
   </div>
 </div>

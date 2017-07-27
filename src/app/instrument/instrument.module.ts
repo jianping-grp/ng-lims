@@ -13,6 +13,7 @@ import {
 } from 'primeng/primeng';
 import {FormsModule} from '@angular/forms';
 import {DateTimePickerModule} from 'ng-pick-datetime';
+import { DaScheduleComponent } from './instrument-detail/da-schedule/da-schedule.component';
 
 
 @NgModule({
@@ -35,7 +36,8 @@ import {DateTimePickerModule} from 'ng-pick-datetime';
     DepartmentListComponent,
     InstrumentListComponent,
     InstrumentCardComponent,
-    InstrumentDetailComponent
+    InstrumentDetailComponent,
+    DaScheduleComponent,
   ]
 })
 export class InstrumentModule {
