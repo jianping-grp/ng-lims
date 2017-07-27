@@ -8,10 +8,14 @@ li.selected{
     padding: 15px 0px 15px 0px;
 }
 .panel-heading{
-  background-color: #66afe9;
+  background-color: #3a87ad;
+}
+
+ul li a{
+  color: #3a87ad;
 }
 
 ul li a:hover{
-  background-color: #66afe9;
+  background-color: #3a87ad;
   color: #ffffff;
 }

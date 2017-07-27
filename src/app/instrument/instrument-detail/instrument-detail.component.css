@@ -18,10 +18,10 @@ th {
   font-weight: bold;
 }
 .panel-heading{
-  background-color: #66afe9;
+  background-color: #3a87ad;
   color: #ffffff;
 }
 
-.ui-grid-row{
-  margin: 10px;
+.ui-grid-row .errorColor{
+  color: #e51c23;
 }

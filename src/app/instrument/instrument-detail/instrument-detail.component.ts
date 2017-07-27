@@ -314,12 +314,6 @@ export class InstrumentDetailComponent implements OnInit {
     ]
   }
 
-  // ErrorMessages = {
-  //   first:'起始时间必须小于结束时间',
-  //   second:'结束时间必须在当前时间之后',
-  //   third:`起始时间不得早于${this.instrument.reservation_start_time}`,
-  //   four:`结束时间不得晚于${this.instrument.reservation_end_time}`
-  // }
 }
 
 // todo:颜色区分，错误信息提示；
