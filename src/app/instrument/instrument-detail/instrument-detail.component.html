@@ -131,7 +131,7 @@
               <div class="ui-grid-col-8" >
                 <ul *ngFor="let errorStatus of errorsStatus" class="list-unstyled">
                   <li class="errorColor" *ngIf="!errorStatus.status">
-                    <p>{{errorStatus.message}}</p>
+                    {{errorStatus.message}}
                   </li>
                 </ul>
               </div>

@@ -23,4 +23,5 @@ export class Instrument {
   charge_type: ChargeType | number;
   manufacturer: Manufacturer | number;
   model: string;
+  links:any;
 }

@@ -23,37 +23,37 @@ export class LimsRestService {
 
   modifyReservation(reservationId: number,body:any){
     return this.http.put(`${this.restUrl}/reservation/${reservationId}`,body)
-      .map(this.extractData)
+      .map((res:Response)=>res.json())
       .catch(this.handleError);
   }
   createReservation(body:any){
     return this.http.post(`${this.restUrl}/reservation`,body)
-      .map(this.extractData)
+      .map((res:Response)=>res.json())
       .catch(this.handleError);
   }
 
 
   getDepartmentList(): Observable<Department[]> {
-    return this.fetchData('department')
-      .map(this.extractDataList)
+    return this.fetchData('departments')
+      .map((res:Response)=>res.json().departments)
       .catch(this.handleError);
   }
 
   getInstrument(id: number): Observable<Instrument> {
-    return this.fetchData(`instrument/${id}`)
-      .map(this.extractData)
+    return this.fetchData(`instruments/${id}`)
+      .map((res:Response)=>res.json().instrument)
       .catch(this.handleError)
   }
 
   getInstrumentList(): Observable<Instrument[]> {
-    return this.fetchData(`instrument`)
-      .map(this.extractDataList)
+    return this.fetchData(`instruments`)
+      .map((res:Response)=>res.json().instruments)
       .catch(this.handleError);
   }
 
   getUser(userID: number): Observable<User> {
-    return this.fetchData(`user/${userID}`)
-      .map(this.extractData)
+    return this.fetchData(`users/${userID}`)
+      .map((res:Response)=>res.json().user)
       .catch(this.handleError)
   }
 
@@ -62,27 +62,28 @@ export class LimsRestService {
       return this.getInstrumentList();
     }
     else {
-      return this.fetchData(`instrument/?department=${departmentID}`)
-        .map(this.extractDataList)
+      return this.fetchData(`instruments/?filter{department}=${departmentID}`)
+        .map((res:Response)=>res.json().instruments)
         .catch(this.handleError)
     }
   }
 
   getReservation(instrumentId: number): Observable<Reservation[]> {
-    return this.fetchData(`reservation/?instrument=${instrumentId}`)
-      .map(this.extractDataList)
+    return this.fetchData(`reservations/?filter{instrument}=${instrumentId}`)
+      .map((res:Response)=>res.json().reservations)
       .catch(this.handleError)
   }
 
-  private extractDataList(res: Response) {
-    let body = res.json();
-    return body.results || {};
-  }
+  // private extractDataList(res: Response) {
+  //   let body = res.json();
+  //   console.log('body:',body)
+  //   return body || {};
+  // }
 
-  private extractData(res: Response) {
-    let body = res.json();
-    return body || {};
-  }
+  // private extractData(res: Response) {
+  //   let body = res.json();
+  //   return body || {};
+  // }
 
   private handleError(error: Response | any) {
     // we might use a remote logging infrastructure

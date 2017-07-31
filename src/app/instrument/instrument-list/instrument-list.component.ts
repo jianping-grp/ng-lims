@@ -88,6 +88,7 @@ export class InstrumentListComponent implements OnInit {
     else {
       this.restService.getInstrumentListByDepartment(departmentId)
         .subscribe(
+
           instrumentList => this.instrumentList = instrumentList,
           error => this.errorMsg = <any> error
         )

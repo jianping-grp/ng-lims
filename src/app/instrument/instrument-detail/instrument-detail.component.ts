@@ -92,10 +92,11 @@ export class InstrumentDetailComponent implements OnInit {
   }
 
   getReservation(instrumentId: number) {
+    console.log(instrumentId)
     this.scheduleEvents = [];
     this.restService.getReservation(instrumentId)
       .subscribe(
-        initReservations => {
+        (initReservations:Reservation[] )=> {
           console.log('选中的instrument的所有预约情况', initReservations)
           initReservations.map(reservation => {
             const event = new ScheduleReservation();
