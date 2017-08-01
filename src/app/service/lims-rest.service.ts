@@ -7,13 +7,14 @@ import {Observable} from "rxjs/Observable";
 import {Http, Response, Headers, ResponseOptions} from "@angular/http";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class LimsRestService {
   private restUrl = 'http://localhost:8080/api'
   private headers = new Headers({'Content-Type': 'application/json'})
   constructor(
-    private http: Http
+    private http: HttpClient
   ) {
   }
 
@@ -32,10 +33,10 @@ export class LimsRestService {
       .catch(this.handleError);
   }
 
-
+// todo:修改http.get.map
   getDepartmentList(): Observable<Department[]> {
     return this.fetchData('departments')
-      .map((res:Response)=>res.json().departments)
+      .map((res:Response)=>res['departments'])
       .catch(this.handleError);
   }
 
@@ -45,9 +46,10 @@ export class LimsRestService {
       .catch(this.handleError)
   }
 
+  // todo: 修改http.get.map
   getInstrumentList(): Observable<Instrument[]> {
     return this.fetchData(`instruments`)
-      .map((res:Response)=>res.json().instruments)
+      .map((res:Response)=>res['instruments'])
       .catch(this.handleError);
   }
 
