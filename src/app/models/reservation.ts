@@ -3,7 +3,7 @@ import {User} from "./user";
 export class Reservation {
   id: number;
   instrument?: Instrument | number;
-  user?: User;
+  user?: number;
   start_time: string;
   end_time: string;
 }

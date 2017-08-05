@@ -109,7 +109,6 @@ export class InstrumentDetailComponent implements OnInit {
   }
 
   getReservation(instrumentId: number) {
-    console.log(instrumentId)
     this.scheduleEvents = [];
     this.restService.getReservation(instrumentId)
       .subscribe(
@@ -136,7 +135,6 @@ export class InstrumentDetailComponent implements OnInit {
             const lastMonths = today.subtract(3, 'months').format();
             if (moment(event.start).isSameOrAfter(lastMonths)) {
               this.scheduleEvents.push(event);
-              console.log('scheduleEvents:',this.scheduleEvents)
             }
           })
         }
@@ -219,9 +217,6 @@ export class InstrumentDetailComponent implements OnInit {
     this.event.start = start ? start.format() : null;
     this.event.end = end ? end.format() : start.add(2, 'h').format();
 
-
-    console.log(this.event_Constraint);
-
     const now_time = moment().format();
     this.reservationStartTime = start.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
     this.reservationEndTime = end.format('YYYY-MM-DD ') + this.instrument.reservation_end_time;
@@ -233,6 +228,12 @@ export class InstrumentDetailComponent implements OnInit {
           && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
 
         this.isDeleted = true
+
+      const reservation={
+        start_time : this.event.start,
+        end_time : this.event.end
+      };
+      this.restService.modifyReservation(this.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
     }
     else {
       this.isSaved = false;
@@ -252,12 +253,13 @@ export class InstrumentDetailComponent implements OnInit {
         let index: number = this.findEventIndexById(this.event.id);
         if (index >= 0) {
           this.scheduleEvents[index] = this.event;
+
+          const reservation={
+            start_time : this.event.start,
+            end_time : this.event.end
+          };
+          this.restService.modifyReservation(this.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
         }
-        // const event = new Reservation();
-        // event.start_time = this.event.start;
-        // event.end_time = this.event.end;
-        // event.instrument = this.instrument.id;
-        // this.restService.modifyReservation(this.event.id,event).subscribe(data=> console.log('修改的预约是：',data))
       }
     }
     //create
@@ -266,16 +268,16 @@ export class InstrumentDetailComponent implements OnInit {
         alert('时间冲突，请检查');
       }
       else {
-        this.event.id = UUID.UUID(); //todo:UUid为string;
-        // this.selectedEvent = this.event;
-        this.scheduleEvents.push(this.event);
-
-        // const event = new Reservation();
-        // event.start_time = this.event.start;
-        // event.end_time = this.event.end;
-        // event.instrument = this.instrument.id;
-        // this.restService.createReservation(event).subscribe(data=> console.log('创建的新预约是：',data))
-
+        const reservation = new Reservation();
+        reservation.user = this.userInfo.id;
+        reservation.start_time = this.event.start;
+        reservation.end_time = this.event.end;
+        reservation.instrument = this.instrument.id;
+        this.restService.createReservation(reservation).subscribe(data=> {
+          console.log('创建的新预约是：',data);
+          this.event.id = data['reservation'].id;
+          this.scheduleEvents.push(this.event)
+        })
       }
     }
     this.isConflicting = null;
@@ -286,7 +288,8 @@ export class InstrumentDetailComponent implements OnInit {
   deleteEvent() {
     let index: number = this.findEventIndexById(this.event.id);
     if (index >= 0) {
-      this.scheduleEvents.splice(index, 1)
+      this.scheduleEvents.splice(index, 1);
+      this.restService.deleteReservation(this.event.id).subscribe(data=>console.log('删除的预约为：',data))
     }
     this.dialogVisible = false;
   }
@@ -346,13 +349,11 @@ export class InstrumentDetailComponent implements OnInit {
 
   isBefore(one, another):boolean {
     let pass = moment(one).isBefore(moment(another));
-    console.log('pass is', pass);
     return pass ? pass : false;
   }
 
   isSameOrBefore(one, another):boolean{
     let pass = moment(one).isSameOrBefore(moment(another));
-    console.log('samepass is', pass);
     return pass ? pass : false;
   }
 
@@ -382,7 +383,6 @@ export class InstrumentDetailComponent implements OnInit {
       else {
       }
     }
-    console.log(this.isConflicting)
   }
 
   errorStatusInfo(now_time:any):any[]{

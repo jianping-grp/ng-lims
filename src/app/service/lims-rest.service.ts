@@ -22,15 +22,25 @@ export class LimsRestService {
   }
 
   modifyReservation(reservationId: number,body:any){
-    return this.http.put(`${this.restUrl}/reservation/${reservationId}`,body)
-      .map((res:Response)=>res.json())
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.patch(`${this.restUrl}/reservations/${reservationId}/`,body,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res)
       .catch(this.handleError);
   }
   createReservation(body:any){
-    return this.http.post(`${this.restUrl}/reservation`,body)
-      .map((res:Response)=>res.json())
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.post(`${this.restUrl}/reservations/`,body,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res)
       .catch(this.handleError);
   }
+  deleteReservation(reservationId:number){
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.delete(`${this.restUrl}/reservations/${reservationId}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
+
+
 
 // todo:修改http.get.map
   getDepartmentList(): Observable<Department[]> {
