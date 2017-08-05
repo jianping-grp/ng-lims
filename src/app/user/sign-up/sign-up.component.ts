@@ -1,5 +1,7 @@
 import { Component} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AuthenticationService} from "../../service/authentication.service";
+import {data} from "apollo-client/data/store";
 
 function passwordMatcher(c:AbstractControl){
   if (!c.get('password') || !c.get('confirm'))return null;
@@ -18,7 +20,8 @@ export class SignUpComponent{
   signUpForm:FormGroup;
 
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authenticationService:AuthenticationService
   ) {
     this.signUpForm = this.fb.group({
       username: ['', [
@@ -116,7 +119,30 @@ export class SignUpComponent{
   };
 
   onSubmit(){
-    console.log('signupForm:',this.signUpForm.value)
+    const form = this.signUpForm.value
+    const body = {
+      username:form.username,
+      password:form.passwordgrp.password,
+      last_name:form.lastname,
+      first_name:form.firstname,
+      email:form.email,
+      phone:form.phone
+    }
+    this.authenticationService.registry(body).subscribe(
+      data=>{
+        console.log(data);
+        alert('注册成功');
+      },
+      err => {
+        if (err.error.username){
+          alert(err.error.username)
+        }
+        if (err.error.email){
+          alert(err.error.email)
+        }
+      }
+    )
+
   }
 
 

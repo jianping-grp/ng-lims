@@ -1,14 +1,12 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {Instrument} from '../../models/instrument';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {LimsRestService} from '../../service/lims-rest.service';
 import {ScheduleReservation} from '../../models/schedule-reservation';
-import {Http} from '@angular/http';
 import {Reservation} from '../../models/reservation';
-import {User} from '../../models/user';
 import * as moment from 'moment';
 import {UUID} from 'angular2-uuid';
-
+import {AuthenticationService} from "../../service/authentication.service";
 
 @Component({
   selector: 'app-instrument-detail',
@@ -16,7 +14,11 @@ import {UUID} from 'angular2-uuid';
   styleUrls: ['./instrument-detail.component.css']
 })
 export class InstrumentDetailComponent implements OnInit {
-  myUser = new User; // simulate a user
+
+  currentUser:any;
+  username:string;
+  userInfo:any;
+
   instrument: Instrument;
   errorMsg: string;
 
@@ -36,6 +38,7 @@ export class InstrumentDetailComponent implements OnInit {
   event_Constraint: any;
 
   isSaved: boolean;
+  isDeleted:boolean;
   isConflicting: boolean;
   errorsStatus:any[];
   daSchedule:boolean = false;
@@ -43,13 +46,14 @@ export class InstrumentDetailComponent implements OnInit {
   constructor(
     private restService: LimsRestService,
     private activatedRoute: ActivatedRoute,
-    private http: Http,
-    private cd: ChangeDetectorRef,
-    private router:Router
+    private router:Router,
+    private authenticationService:AuthenticationService
+
   ) {
-    this.myUser.last_name = '赵';
-    this.myUser.first_name = '宇飞';
+
+
   }
+
 
   ngOnInit() {
 
@@ -58,12 +62,25 @@ export class InstrumentDetailComponent implements OnInit {
       center: 'title',
       right: 'month,agendaWeek,agendaDay listWeek myCustomeButton'
     };
+    let storedUser = JSON.parse(localStorage.getItem('currentUser'))
+    this.currentUser = storedUser;
+    this.username = storedUser? storedUser['user_name']: storedUser;
+
+    if (this.currentUser && this.username){
+      this.restService.getUser(this.username).subscribe(
+        user=>{
+          console.log('我是登录的user:',user[0]);
+          this.userInfo=user[0]
+        })
+    }
+
     this.activatedRoute.params
     // (+) converts string 'id' to a number
       .subscribe(
         (params: Params) => this.getInstrument(+params['id']),
         (err: Error) => console.log(err)
       );
+
   }
 
   getInstrument(id: number) {
@@ -101,14 +118,25 @@ export class InstrumentDetailComponent implements OnInit {
           initReservations.map(reservation => {
             const event = new ScheduleReservation();
             event['id'] = reservation.id;
-            event['title'] = reservation.user.last_name + reservation.user.first_name;
+            event['title'] = reservation.user;
             event['start'] = reservation.start_time;
             event['end'] = reservation.end_time;
-            // todo:只显示过去三个月以来的日程安排；
+            // if (reservation.user.username == this.username){
+            // if (this.currentUser && (this.userInfo.last_name+this.userInfo.first_name) == event['title']){
+            if (this.currentUser && (this.userInfo.id == event['title'])){
+              event['editable']= true;
+              event['backgroundColor']='blue';
+            }
+            // else if (this.currentUser == ){
+            //
+            // }
+
+            // 只显示过去三个月以来的日程安排；
             const today = moment();
             const lastMonths = today.subtract(3, 'months').format();
             if (moment(event.start).isSameOrAfter(lastMonths)) {
               this.scheduleEvents.push(event);
+              console.log('scheduleEvents:',this.scheduleEvents)
             }
           })
         }
@@ -120,14 +148,24 @@ export class InstrumentDetailComponent implements OnInit {
     this.event = new ScheduleReservation();
     this.event.start =e.date?  e.date.format() : e.date.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
     this.event.end = moment(this.event.start).add(1, 'h').format('YYYY-MM-DDTHH:mm:ss');
-    this.event.title = this.myUser.last_name + this.myUser.first_name;
+    this.event.title = this.userInfo? (this.userInfo.id):null;
+
 
     const now_time = moment().format();
     this.reservationStartTime = e.date.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
     this.reservationEndTime = e.date.format('YYYY-MM-DD ') + this.instrument.reservation_end_time;
 
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
-                && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+    // 用户名和点击的事件名字相同，才可以保存。
+    if (this.currentUser){
+        this.event.editable= true;
+        this.event.backgroundColor='blue';
+        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
+          && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+    }
+    else {
+      this.isSaved = false
+    }
+
     console.log('DayClick的scheduleEvents：', this.scheduleEvents);
 
     this.errorStatusInfo(now_time)
@@ -144,6 +182,7 @@ export class InstrumentDetailComponent implements OnInit {
     this.event.id = e.calEvent.id;
     this.event.title = e.calEvent.title;
 
+
     // 解决 当前时间和当天可预约时间，哪个作为预约的最小时间。
     const now_time = moment().format();
     this.reservationStartTime = start.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
@@ -152,8 +191,19 @@ export class InstrumentDetailComponent implements OnInit {
     // this.min_start = now_reservationStart_Compare ? reservationStartTime : now_time; // todo:当前时间之后，8点之后才可选
     // this.min_end = start.format('YYYY-MM-DD HH:mm:ss');
 
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
-                && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+    if (this.currentUser && (this.userInfo.id == this.event['title'])){
+        this.event.editable= true;
+        this.event.backgroundColor='blue';
+        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
+          && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+        this.isDeleted = true
+    }
+    else {
+      this.isSaved = false;
+      this.isDeleted = false;
+    }
+
     console.log('EventClick的scheduleEvents：', this.scheduleEvents)
 
     this.errorStatusInfo(now_time)
@@ -168,15 +218,26 @@ export class InstrumentDetailComponent implements OnInit {
     let end = e.event.end;
     this.event.start = start ? start.format() : null;
     this.event.end = end ? end.format() : start.add(2, 'h').format();
+
+
     console.log(this.event_Constraint);
 
     const now_time = moment().format();
     this.reservationStartTime = start.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
     this.reservationEndTime = end.format('YYYY-MM-DD ') + this.instrument.reservation_end_time;
 
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
-                && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
-    console.log('拖动的scheduleEvents：', this.scheduleEvents)
+    if (this.currentUser && (this.userInfo.id == this.event['title'])){
+        this.event.editable= true;
+        this.event.backgroundColor='blue';
+        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
+          && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+        this.isDeleted = true
+    }
+    else {
+      this.isSaved = false;
+      this.isDeleted = false;
+    }
 
     this.errorStatusInfo(now_time)
   }
@@ -248,8 +309,17 @@ export class InstrumentDetailComponent implements OnInit {
     this.event.start = moment(e).format('YYYY-MM-DDTHH:mm:ss');
 
     const now_time = moment().format();
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
-                && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+    if (this.currentUser && (this.userInfo.id == this.event['title'])){
+        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
+          && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+        this.isDeleted = true
+    }
+    else {
+      this.isSaved = false;
+      this.isDeleted = false;
+    }
 
     this.errorStatusInfo(now_time)
   }
@@ -259,8 +329,17 @@ export class InstrumentDetailComponent implements OnInit {
     this.event.end = moment(e).format('YYYY-MM-DDTHH:mm:ss');
 
     const now_time = moment().format();
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
-                && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+    if (this.currentUser && (this.userInfo.id == this.event['title'])){
+        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isBefore(now_time, this.event.end)
+          && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime);
+
+        this.isDeleted = true
+    }
+    else {
+      this.isSaved = false;
+      this.isDeleted = false;
+    }
 
     this.errorStatusInfo(now_time)
   }
@@ -309,6 +388,7 @@ export class InstrumentDetailComponent implements OnInit {
   errorStatusInfo(now_time:any):any[]{
     // 这些验证信息必须对应判断this.isSaved的信息。
     return this.errorsStatus = [
+      {status:this.isDeleted,message:'只能操作本用户的预约'},
       {status:this.isBefore(this.event.start, this.event.end),message:'起始时间须早于结束时间'},
       {status:this.isBefore(now_time, this.event.end),message:'结束时间须晚于当前时间'},
       {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:`起始时间不得早于${this.min_sche}`},

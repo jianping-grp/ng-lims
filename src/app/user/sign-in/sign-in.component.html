@@ -1,4 +1,11 @@
-<form class="form-horizontal well-lg" [formGroup]="signInForm" (ngSubmit)="signIn()">
+
+
+<div *ngIf="currentUser; else signinFormBlock">
+  <p>欢迎登录联合院系统</p>
+</div>
+<ng-template #signinFormBlock>
+
+<form class="form-horizontal well-lg" #signInForm="ngForm" (ngSubmit)="signIn()" novalidate>
   <div class="page-header">
     <h4>欢迎登录使用TJAB仪器管理平台</h4>
   </div>
@@ -6,13 +13,13 @@
     <div class="form-group">
       <label for="username" class="col-lg-3 control-label">用户名:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="text" name="username" id="username" [formControl]="username">
+        <input class="input-lg" type="text" name="username" id="username" [(ngModel)]="username"  placeholder="请输入您的用户名">
       </div>
     </div>
     <div class="form-group">
       <label for="password" class="col-lg-3 control-label">密 码:</label>
       <div class="col-lg-9">
-        <input class="input-lg" type="password" name="password" id="password" [formControl]="password">
+        <input class="input-lg" type="password" name="password" id="password" [(ngModel)]="password"  placeholder="请输入您的密码">
       </div>
     </div>
     <div class="form-group">
@@ -23,3 +30,7 @@
     </div>
   </div>
 </form>
+
+</ng-template>
+
+

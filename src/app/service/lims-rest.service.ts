@@ -7,12 +7,11 @@ import {Observable} from "rxjs/Observable";
 import {Http, Response, Headers, ResponseOptions} from "@angular/http";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 @Injectable()
 export class LimsRestService {
-  private restUrl = 'http://localhost:8080/api'
-  private headers = new Headers({'Content-Type': 'application/json'})
+  private restUrl = 'http://localhost:8000/api'
   constructor(
     private http: HttpClient
   ) {
@@ -42,7 +41,7 @@ export class LimsRestService {
 
   getInstrument(id: number): Observable<Instrument> {
     return this.fetchData(`instruments/${id}`)
-      .map((res:Response)=>res.json().instrument)
+      .map((res:Response)=>res['instrument'])
       .catch(this.handleError)
   }
 
@@ -53,9 +52,15 @@ export class LimsRestService {
       .catch(this.handleError);
   }
 
-  getUser(userID: number): Observable<User> {
-    return this.fetchData(`users/${userID}`)
-      .map((res:Response)=>res.json().user)
+  // getUser(userID: number): Observable<User> {
+  //   return this.fetchData(`users/${userID}`)
+  //     .map((res:Response)=>res['user'])
+  //     .catch(this.handleError)
+  // }
+  getUser(username:string): Observable<User>{
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.get(`${this.restUrl}/users/?filter{username}=${username}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res['users'])
       .catch(this.handleError)
   }
 
@@ -65,14 +70,14 @@ export class LimsRestService {
     }
     else {
       return this.fetchData(`instruments/?filter{department}=${departmentID}`)
-        .map((res:Response)=>res.json().instruments)
+        .map((res:Response)=>res['instruments'])
         .catch(this.handleError)
     }
   }
 
   getReservation(instrumentId: number): Observable<Reservation[]> {
     return this.fetchData(`reservations/?filter{instrument}=${instrumentId}`)
-      .map((res:Response)=>res.json().reservations)
+      .map((res:Response)=>res['reservations'])
       .catch(this.handleError)
   }
 

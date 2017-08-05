@@ -64,12 +64,15 @@
         </ng-template>
       </div>
     </div>
-
+    <div class="alert alert-danger" *ngIf="!currentUser">
+      <h4>温馨提示： 请登录后再预约</h4>
+    </div>
     <div class="row schedule" *ngIf="!daSchedule">
       <div class="content-section implementation">
         <p-schedule [events]="scheduleEvents"
                     [header]="header"
-                    [editable]="true"
+                    [editable]="false"
+                    [allDaySlot]="false"
                     [eventOverlap]="false"
                     [eventConstraint]="event_Constraint"
                     [businessHours]="businessHours"
@@ -141,7 +144,7 @@
           <p-footer>
             <div class="ui-dialog-buttonpane ui-helper-clearfix">
               <button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete"
-                      [disabled]="!event?.id"></button>
+                      [disabled]="!isDeleted"></button>
               <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save"
                       [disabled]="!event?.start || !event?.end || !isSaved"></button>
             </div>
