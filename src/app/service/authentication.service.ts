@@ -7,7 +7,7 @@ import {Subject} from "rxjs/Subject";
 
 @Injectable()
 export class AuthenticationService {
-  private authUrl:string = 'http://localhost:8000/auth';
+  private authUrl:string = 'http://localhost:8000/api/auth';
   currentUser:Subject<any>;
   constructor(private http: HttpClient) {
     this.currentUser = new Subject();
@@ -21,6 +21,7 @@ export class AuthenticationService {
             user_token:res['auth_token'],
             user_name:username
           };
+          console.log('Login token:',user)
           localStorage.setItem('currentUser', JSON.stringify(user));
           this.currentUser.next(user);
           return user;

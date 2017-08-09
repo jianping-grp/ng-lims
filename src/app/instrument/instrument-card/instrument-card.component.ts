@@ -2,6 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Instrument} from "../../models/instrument";
 import {ShareService} from "../../service/share.service";
 import {ActivatedRoute, Router} from "@angular/router";
+import {LimsRestService} from "../../service/lims-rest.service";
+import {User} from "../../models/user";
 
 @Component({
   selector: 'app-instrument-card',
@@ -11,11 +13,16 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class InstrumentCardComponent implements OnInit {
   @Input() instrument: Instrument;
 
-  constructor(private shareService: ShareService,
-              private router: Router) {
+  admin:User;
+  constructor(
+            private shareService: ShareService,
+            private router: Router,
+            private restService:LimsRestService
+  ) {
   }
 
   ngOnInit() {
+    this.restService.getAdmin(this.instrument.admin).subscribe((admins:User[])=>this.admin = admins[0])
   }
 
   viewDetail() {

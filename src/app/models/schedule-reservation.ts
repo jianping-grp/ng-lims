@@ -1,5 +1,6 @@
 export class ScheduleReservation {
-  id:any; // number | string
+  id:number;
+  userId:number;
   title: any;
   start: string;
   end: string;

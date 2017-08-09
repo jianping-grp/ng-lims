@@ -25,3 +25,23 @@ th {
 .ui-grid-row .errorColor{
   color: #e51c23;
 }
+
+.panel .panel-body .chart button{
+  background-color: #DB5956;
+}
+
+/*.colorRec{*/
+  /*left:0;*/
+/*}*/
+
+/*.colorRec div .btn,.btn-default{*/
+  /*background-color: #23d271;*/
+/*}*/
+
+.reservation_sign input {
+  margin: 5px ;
+}
+
+.ui-growl-container{
+  top:70px;
+}

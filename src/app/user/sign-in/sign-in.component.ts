@@ -19,8 +19,8 @@ export class SignInComponent {
     this.authenticationService.currentUser.subscribe(
       user  => {
         this.currentUser = user;
-        this.username = user? user.user_name : user;
-        console.log(this.currentUser,this.username)
+        // this.username = user? user.user_name : user;
+        // console.log(this.currentUser,this.username)
       }
     );
   }

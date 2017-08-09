@@ -2,6 +2,7 @@ import { Component} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AuthenticationService} from "../../service/authentication.service";
 import {data} from "apollo-client/data/store";
+import {Router} from "@angular/router";
 
 function passwordMatcher(c:AbstractControl){
   if (!c.get('password') || !c.get('confirm'))return null;
@@ -21,7 +22,8 @@ export class SignUpComponent{
 
   constructor(
     private fb: FormBuilder,
-    private authenticationService:AuthenticationService
+    private authenticationService:AuthenticationService,
+    private router:Router
   ) {
     this.signUpForm = this.fb.group({
       username: ['', [
@@ -117,6 +119,20 @@ export class SignUpComponent{
       'maxlength':'必须是11位手机号码;'
     },
   };
+  // usernameSend(){
+  //   const form = this.signUpForm.value;
+  //   const body = {
+  //     username:form.username
+  //   }
+  //   this.authenticationService.registry(body).subscribe(
+  //     data=>{},
+  //     err=>{
+  //       if (err.error.username){
+  //         alert(err.error.username)
+  //       }
+  //     }
+  //   )
+  // }
 
   onSubmit(){
     const form = this.signUpForm.value
@@ -132,6 +148,7 @@ export class SignUpComponent{
       data=>{
         console.log(data);
         alert('注册成功');
+        this.router.navigate(['./sign-in'])
       },
       err => {
         if (err.error.username){

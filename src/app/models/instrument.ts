@@ -14,7 +14,7 @@ export class Instrument {
   application: string;
   accessories: string;
   department?: Department | number;
-  admin?: User | number;
+  admin?: number;
   sci_discount: boolean;
   reservation_type: ReservationType | number;
   reservation_time_unit: number;

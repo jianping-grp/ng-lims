@@ -11,9 +11,10 @@
       </div>
       <div class="col-lg-8">
         <!--<app-user-info-card [userID]="instrument.admin"></app-user-info-card>-->
-        <p>管理员：{{instrument?.admin.last_name + instrument?.admin.first_name}}</p>
-        <p>电话：{{instrument?.admin.phone}}</p>
-        <p>位置：{{instrument?.location}}</p>
+        <p>管理员： {{admin?.last_name + admin?.first_name}}</p>
+        <p>电话： {{admin?.phone}}</p>
+        <p>位置： {{instrument?.location}}</p>
+        <p>仪器型号: {{instrument.id}}</p>
       </div>
   </div>
 </div>

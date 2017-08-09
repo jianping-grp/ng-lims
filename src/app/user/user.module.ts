@@ -5,13 +5,17 @@ import { SignInComponent } from './sign-in/sign-in.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RouterModule} from '@angular/router';
+import {PasswordModule} from "primeng/primeng";
+import {ModalModule} from "ngx-bootstrap";
 
 @NgModule({
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PasswordModule,
+    ModalModule.forRoot()
   ],
   declarations: [UserComponent, SignInComponent, SignUpComponent],
   exports: [UserComponent]

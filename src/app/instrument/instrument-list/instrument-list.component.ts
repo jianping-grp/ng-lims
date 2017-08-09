@@ -25,40 +25,13 @@ export class MyEvent {
 })
 export class InstrumentListComponent implements OnInit {
   instrumentList: Instrument[];
-  departmentId: number;
   errorMsg: string;
 
-
-  // events: any[];
-  //
-  // header: any;
-  //
-  // event: MyEvent;
-  //
-  // dialogVisible: boolean = false;
-  //
-  // idGen: number = 100;
 
   constructor(private restService: LimsRestService,
               private route: ActivatedRoute) {
     console.log('instrument list constructed')
-    // this.shareService.selectedDepartmentID$.subscribe(
-    //   data => {
-    //     this.getInstrumentListByDepartment(data);
-    //   }
-    // )
-    // this.header = {
-    //   left: 'prev,next today',
-    //   center: 'title',
-    //   right: 'month,agendaWeek,agendaDay'
-    // };
-    // this.events=[
-    //   {
-    //     title:'赵宇飞',
-    //     start:'2017-07-20T10:00:00',
-    //     end:'2017-07-20T12:00:00'
-    //   }
-    // ]
+
   }
 
   ngOnInit() {
@@ -74,25 +47,30 @@ export class InstrumentListComponent implements OnInit {
   getInstrumentListByDepartment(departmentId: number) {
     console.log(`get instrument list (department id ${departmentId})`)
     // all instruments
-    if (isNaN(departmentId)){
-      departmentId = 0;
-    }
 
-    if (departmentId === 0) {
-      this.restService.getInstrumentList()
-        .subscribe(
-          instrumentList => this.instrumentList = instrumentList,
-          error => this.errorMsg = <any> error
-        )
-    }
-    else {
-      this.restService.getInstrumentListByDepartment(departmentId)
-        .subscribe(
+      if (isNaN(departmentId)) {
+        departmentId = 0;
+      }
 
-          instrumentList => this.instrumentList = instrumentList,
-          error => this.errorMsg = <any> error
-        )
-    }
+      if (departmentId === 0) {
+        this.restService.getInstrumentList()
+          .subscribe(
+            instrumentList => {
+              this.instrumentList = instrumentList;
+            },
+            error => this.errorMsg = <any> error
+          )
+      }
+      else {
+        this.restService.getInstrumentListByDepartment(departmentId)
+          .subscribe(
+            instrumentList => {
+              this.instrumentList = instrumentList;
+            },
+            error => this.errorMsg = <any> error
+          )
+      }
+
   }
 
 

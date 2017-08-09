@@ -49,9 +49,9 @@ export class LimsRestService {
       .catch(this.handleError);
   }
 
-  getInstrument(id: number): Observable<Instrument> {
-    return this.fetchData(`instruments/${id}`)
-      .map((res:Response)=>res['instrument'])
+  getInstrument(id: number) {
+    return this.fetchData(`instruments/${id}/?include[]=admin.*`)
+      .map((res:Response)=>res)
       .catch(this.handleError)
   }
 
@@ -62,12 +62,13 @@ export class LimsRestService {
       .catch(this.handleError);
   }
 
-  // getUser(userID: number): Observable<User> {
-  //   return this.fetchData(`users/${userID}`)
-  //     .map((res:Response)=>res['user'])
-  //     .catch(this.handleError)
-  // }
-  getUser(username:string): Observable<User>{
+  getAdmin(adminID: number){
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.get(`${this.restUrl}/users/?filter{id}=${adminID}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res['users'])
+      .catch(this.handleError)
+  }
+  getUser(username:string): Observable<User[]>{
     let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
     return this.http.get(`${this.restUrl}/users/?filter{username}=${username}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
       .map((res:Response)=>res['users'])
@@ -85,9 +86,15 @@ export class LimsRestService {
     }
   }
 
-  getReservation(instrumentId: number): Observable<Reservation[]> {
-    return this.fetchData(`reservations/?filter{instrument}=${instrumentId}`)
-      .map((res:Response)=>res['reservations'])
+
+  getReservations(instrumentId: number){
+    return this.fetchData(`reservations/?filter{instrument}=${instrumentId}&include[]=user.*`)
+      .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
+  getReservationsByUser(username: string){
+    return this.fetchData(`reservations/?include[]=user.*&filter{user.username}=${username}`)
+      .map((res:Response)=>res)
       .catch(this.handleError)
   }
 

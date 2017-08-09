@@ -9,7 +9,7 @@ import {InstrumentCardComponent} from './instrument-card/instrument-card.compone
 import {InstrumentDetailComponent} from './instrument-detail/instrument-detail.component';
 import {
   ButtonModule, CalendarModule, CheckboxModule, CodeHighlighterModule, DialogModule, InputTextModule, ScheduleModule,
-  TabViewModule
+  TabViewModule,GrowlModule
 } from 'primeng/primeng';
 import {FormsModule} from '@angular/forms';
 import {DateTimePickerModule} from 'ng-pick-datetime';
@@ -30,6 +30,7 @@ import { DaScheduleComponent } from './instrument-detail/da-schedule/da-schedule
     CodeHighlighterModule,
     InstrumentRoutingModule,
     DateTimePickerModule,
+    GrowlModule
   ],
   declarations: [
     InstrumentComponent,
