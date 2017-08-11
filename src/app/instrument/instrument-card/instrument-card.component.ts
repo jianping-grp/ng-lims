@@ -22,7 +22,7 @@ export class InstrumentCardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.restService.getAdmin(this.instrument.admin).subscribe((admins:User[])=>this.admin = admins[0])
+    this.restService.getInstrument(this.instrument.id).subscribe((data:any)=>this.admin = data['users'][0])
   }
 
   viewDetail() {
