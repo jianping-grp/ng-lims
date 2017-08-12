@@ -1,6 +1,8 @@
 <div class="col-lg-4" *ngFor="let instrument of instrumentList">
   <app-instrument-card
-    [instrument]="instrument">
+    [instrument]="instrument"
+    [admins]="admins"
+  >
   </app-instrument-card>
 </div>
 

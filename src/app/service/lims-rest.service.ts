@@ -56,9 +56,9 @@ export class LimsRestService {
   }
 
   // todo: 修改http.get.map
-  getInstrumentList(): Observable<Instrument[]> {
-    return this.fetchData(`instruments`)
-      .map((res:Response)=>res['instruments'])
+  getInstrumentList(): Observable<any> {
+    return this.fetchData(`instruments/?include[]=admin.*`)
+      .map((res:Response)=>res)
       .catch(this.handleError);
   }
 
@@ -75,13 +75,13 @@ export class LimsRestService {
       .catch(this.handleError)
   }
 
-  getInstrumentListByDepartment(departmentID: number): Observable<Instrument[]> {
+  getInstrumentListByDepartment(departmentID: number): Observable<any> {
     if (departmentID === 0) {
       return this.getInstrumentList();
     }
     else {
-      return this.fetchData(`instruments/?filter{department}=${departmentID}`)
-        .map((res:Response)=>res['instruments'])
+      return this.fetchData(`instruments/?filter{department}=${departmentID}&include[]=admin.*`)
+        .map((res:Response)=>res)
         .catch(this.handleError)
     }
   }

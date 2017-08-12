@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import {AuthenticationService} from "../../service/authentication.service";
 import {User} from "../../models/user";
 import {Message} from 'primeng/primeng';
+import {now} from "moment";
 
 @Component({
   selector: 'app-instrument-detail',
@@ -198,13 +199,9 @@ export class InstrumentDetailComponent implements OnInit {
     else {
       this.dialogVisible = false;
     }
-
-    console.log('DayClick的scheduleEvents：', this.scheduleEvents);
-
     this.errorStatusInfo(now_time)
   }
 
-  //todo: 对已存在的事件，点击进行换时间会造成冲突
   handleEventClick(e) {
 
     this.event = new ScheduleReservation();
@@ -238,16 +235,12 @@ export class InstrumentDetailComponent implements OnInit {
     else {
       this.dialogVisible = false;
     }
-
-    console.log('EventClick的scheduleEvents：', this.scheduleEvents)
-
     this.errorStatusInfo(now_time)
   }
 
   handleDragResize(e) {
     this.dialogVisible = false;
     this.event = new ScheduleReservation();
-
     this.event.id = e.event.id ? e.event.id : null;
     this.event.userId = e.event.userId;
     this.event.title = e.event.title;
@@ -256,18 +249,27 @@ export class InstrumentDetailComponent implements OnInit {
     this.event.start = start ? start.format() : null;
     this.event.end = end ? end.format() : start.add(1, 'h').format();
 
-    if (this.userInfo && (this.userInfo['id'] == this.event.userId)){
-      const now_time = moment().format();
-      if (this.isSameOrBefore(now_time,this.event.start)){
-        const reservation={
-          start_time : this.event.start,
-          end_time : this.event.end,
-          id:this.event.id
-        };
-        this.restService.modifyReservation(this.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
-      }
-      else {
-       e.revertFunc()
+    const now_time = moment().format();
+    if (this.isSameOrBefore(now_time,e.event.start.format())){
+      const reservation={
+        start_time : e.event.start.format(),
+        end_time : e.event.end.format(),
+        id:e.event.id
+      };
+      this.restService.modifyReservation(e.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
+    }
+    else {
+      e.revertFunc()
+      let start = e.event.start;
+      let end = e.event.end;
+      this.event.start = start ? start.format() : null;
+      this.event.end = end ? end.format() : start.add(1, 'h').format();
+      this.event.editable = true;
+
+      let index: number = this.findEventIndexById(this.event.id);
+      if (index >= 0) {
+        this.event.backgroundColor='#23d271';
+        this.scheduleEvents[index] = this.event;
       }
     }
   }
@@ -303,7 +305,6 @@ export class InstrumentDetailComponent implements OnInit {
     }
     this.isConflicting = false;
     this.dialogVisible = false;
-    console.log('save的scheduleEvents：', this.scheduleEvents)
   }
 
   deleteEvent() {
@@ -368,7 +369,6 @@ export class InstrumentDetailComponent implements OnInit {
 
   // 处理预约时间冲突;
   handleConflict(startT?: moment.Moment, endT?: moment.Moment, id?: any) {
-    // todo:可提前几周预约，每次最少预约的时间；如何防止预约次数过多，导致遍历时间复杂度过大。
     for (let i = 0; i < this.scheduleEvents.length; i++) {
       const start = moment(this.scheduleEvents[i].start);
       const end = moment(this.scheduleEvents[i].end);
@@ -412,12 +412,12 @@ export class InstrumentDetailComponent implements OnInit {
     this.daSchedule = !this.daSchedule;
   }
 
-  // showMultiple(){
-  //   this.msgs = [];
-  //   this.msgs.push({severity:'info', summary:'Message 1', detail:'PrimeNG rocks'});
-  //   this.msgs.push({severity:'info', summary:'Message 2', detail:'PrimeUI rocks'});
-  //   this.msgs.push({severity:'info', summary:'Message 3', detail:'PrimeFaces rocks'});
-  // }
+  showMultiple(){
+    this.msgs = [];
+    this.msgs.push({severity:'info', summary:'Message 1', detail:'PrimeNG rocks'});
+    this.msgs.push({severity:'info', summary:'Message 2', detail:'PrimeUI rocks'});
+    this.msgs.push({severity:'info', summary:'Message 3', detail:'PrimeFaces rocks'});
+  }
 
 }
 

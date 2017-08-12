@@ -1,7 +1,6 @@
 import { Component} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AuthenticationService} from "../../service/authentication.service";
-import {data} from "apollo-client/data/store";
 import {Router} from "@angular/router";
 
 function passwordMatcher(c:AbstractControl){

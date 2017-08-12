@@ -67,16 +67,16 @@
     <div class="alert alert-danger" *ngIf="!currentUser">
       <h4>温馨提示： 请登录后再预约</h4>
     </div>
-
-    <!--<p-growl [(value)]="msgs" styleClass="'ui-growl ui-growl-container ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title'"></p-growl>-->
-    <!--<button type="button" pButton (click)="showMultiple()" label="Multiple" ></button>-->
+    <!--styleClass="'ui-growl ui-growl-container ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title'"-->
+    <p-growl [(value)]="msgs"></p-growl>
+    <button type="button" pButton (click)="showMultiple()" label="Multiple" ></button>
 
     <!--ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title-->
     <div class="row schedule" *ngIf="!daSchedule">
       <div class="reservation_sign">
         <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #23d271"><label>当前用户的预约</label><br>
         <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #3a87ad"><label>非当前用户预约</label><br>
-        <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #939593"><label>预约记录</label>
+        <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #939593"><label>预约历史记录</label>
       </div>
       <div class="content-section implementation">
         <p-schedule [events]="scheduleEvents"
