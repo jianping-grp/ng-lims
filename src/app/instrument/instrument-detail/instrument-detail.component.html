@@ -68,8 +68,8 @@
       <h4>温馨提示： 请登录后再预约</h4>
     </div>
     <!--styleClass="'ui-growl ui-growl-container ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title'"-->
-    <p-growl [(value)]="msgs"></p-growl>
-    <button type="button" pButton (click)="showMultiple()" label="Multiple" ></button>
+    <p-growl [(value)]="msgs" [style]="growlStyle" sticky="true"></p-growl>
+    <button type="button" pButton (click)="showMultiple()" label="Multiple" class="ui-button-warning"></button>
 
     <!--ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title-->
     <div class="row schedule" *ngIf="!daSchedule">
@@ -117,7 +117,6 @@
                        [mode]=" 'popup' "
                        [pickerType]=" 'time' "
                        readonly
-                       [disabled]="!isDeleted"
                 >
               </div>
               <!--[minMoment]="min_start"-->
@@ -137,28 +136,21 @@
                        [mode]=" 'popup' "
                        [pickerType]=" 'time' "
                        readonly
-                       [disabled]="!isDeleted"
                 >
               </div>
             </div>
 
-            <div class="ui-grid-row" *ngIf="!isSaved">
-              <div class="ui-grid-col-4"><label class="errorColor">温馨提示：</label></div>
-              <div class="ui-grid-col-8" >
-                <ul *ngFor="let errorStatus of errorsStatus" class="list-unstyled">
-                  <li class="errorColor" *ngIf="!errorStatus.status">
-                    {{errorStatus.message}}
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!--<div class="ui-grid-row" *ngIf="isConflicting">-->
+            <!--<div class="ui-grid-row" *ngIf="!isSaved">-->
               <!--<div class="ui-grid-col-4"><label class="errorColor">温馨提示：</label></div>-->
               <!--<div class="ui-grid-col-8" >-->
-                <!--<p>预约时间冲突</p>-->
+                <!--<ul *ngFor="let errorStatus of errorsStatus" class="list-unstyled">-->
+                  <!--<li class="errorColor" *ngIf="!errorStatus.status">-->
+                    <!--{{errorStatus.message}}-->
+                  <!--</li>-->
+                <!--</ul>-->
               <!--</div>-->
             <!--</div>-->
+
 
           </div>
           <p-footer>

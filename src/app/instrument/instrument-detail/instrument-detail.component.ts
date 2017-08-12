@@ -41,13 +41,13 @@ export class InstrumentDetailComponent implements OnInit {
   event_Constraint: any;
 
   isSaved: boolean;
-  isDeleted:boolean;
   isConflicting: boolean;
   errorsStatus:any[];
   daSchedule:boolean = false;
 
 
   msgs: Message[] = [];
+  growlStyle:any;
 
   constructor(
     private restService: LimsRestService,
@@ -55,6 +55,9 @@ export class InstrumentDetailComponent implements OnInit {
     private router:Router,
     private authenticationService:AuthenticationService
   ) {
+    this.growlStyle = {
+      'top':'70px'
+    }
   }
   ngOnInit() {
 
@@ -135,23 +138,19 @@ export class InstrumentDetailComponent implements OnInit {
             if (this.userInfo && (this.userInfo['id'] == event.userId)){
 
               if (this.isSameOrBefore(now_time,event.start)){
-                this.isDeleted = true;
                 event.editable= true;
                 event.backgroundColor='#23d271';
               }
               else {
-                this.isDeleted = false;
                 event.editable = false;
                 event.backgroundColor='#939593';
               }
             }
             else {
               if (this.isSameOrBefore(now_time,event.start)){
-                this.isDeleted = false;
                 event.editable = false;
               }
               else {
-                this.isDeleted = false;
                 event.editable = false;
                 event.backgroundColor='#939593';
               }
@@ -199,7 +198,10 @@ export class InstrumentDetailComponent implements OnInit {
     else {
       this.dialogVisible = false;
     }
-    this.errorStatusInfo(now_time)
+    // this.errorStatusInfo(now_time)
+    if (!this.isSaved){
+      this.showErrorInfo()
+    }
   }
 
   handleEventClick(e) {
@@ -235,7 +237,10 @@ export class InstrumentDetailComponent implements OnInit {
     else {
       this.dialogVisible = false;
     }
-    this.errorStatusInfo(now_time)
+    // this.errorStatusInfo(now_time)
+    if (!this.isSaved){
+      this.showErrorInfo()
+    }
   }
 
   handleDragResize(e) {
@@ -340,7 +345,10 @@ export class InstrumentDetailComponent implements OnInit {
     this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(now_time, this.event.start)
         && this.isSameOrBefore(this.reservationStartTime, this.event.start) && !this.isConflicting;
 
-    this.errorStatusInfo(now_time)
+    // this.errorStatusInfo(now_time)
+    if (!this.isSaved){
+      this.showErrorInfo()
+    }
   }
 
   setEnd(e) {
@@ -354,7 +362,10 @@ export class InstrumentDetailComponent implements OnInit {
     this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
       && !this.isConflicting;
 
-    this.errorStatusInfo(now_time)
+    // this.errorStatusInfo(now_time)
+    if (!this.isSaved){
+      this.showErrorInfo()
+    }
   }
 
   isBefore(one, another):boolean {
@@ -400,11 +411,12 @@ export class InstrumentDetailComponent implements OnInit {
   errorStatusInfo(now_time:any):any[]{
     // 这些验证信息必须对应判断this.isSaved的信息。
     return this.errorsStatus = [
-      {status:!this.isConflicting,message:'预约时间冲突'},
-      {status:this.isBefore(this.event.start, this.event.end),message:'起始时间不得早于结束时间'},
-      {status:this.isSameOrBefore(now_time, this.event.start),message:'请在当前时间后预约'},
-      {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:`起始时间不得早于${this.min_sche}`},
-      {status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:`结束时间不得晚于${this.max_sche}`}
+      {status:!this.isConflicting,message:{severity:'error', summary:'温馨提示', detail:'时间冲突'}},
+      {status:this.currentUser,message:{severity:'error', summary:'温馨提示', detail:'请登录'}},
+      {status:this.isBefore(this.event.start, this.event.end),message:{severity:'error', summary:'温馨提示', detail:'起始时间应早于结束时间'}},
+      {status:this.isSameOrBefore(now_time, this.event.start),message:{severity:'error', summary:'温馨提示', detail:'当前时间应早于起始时间'}},
+      {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:{severity:'error', summary:'温馨提示', detail:`起始时间应晚于${this.min_sche}`}},
+      {status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:{severity:'error', summary:'温馨提示', detail:`结束时间应早于${this.max_sche}`}}
     ]
   }
 
@@ -412,11 +424,19 @@ export class InstrumentDetailComponent implements OnInit {
     this.daSchedule = !this.daSchedule;
   }
 
-  showMultiple(){
+  showErrorInfo(){
+    const now_time = moment().format();
     this.msgs = [];
-    this.msgs.push({severity:'info', summary:'Message 1', detail:'PrimeNG rocks'});
-    this.msgs.push({severity:'info', summary:'Message 2', detail:'PrimeUI rocks'});
-    this.msgs.push({severity:'info', summary:'Message 3', detail:'PrimeFaces rocks'});
+    this.errorStatusInfo(now_time).map((error)=>{
+      if (!error.status){
+        this.msgs.push(error.message)
+      }
+      else {}
+    })
+    //
+    // this.msgs.push({severity:'error', summary:'Message 1', detail:'PrimeNG rocks'});
+    // this.msgs.push({severity:'error', summary:'Message 2', detail:'PrimeUI rocks'});
+    // this.msgs.push({severity:'error', summary:'Message 3', detail:'PrimeFaces rocks'});
   }
 
 }

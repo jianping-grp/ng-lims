@@ -42,6 +42,7 @@ th {
   margin: 5px ;
 }
 
-.ui-growl-container{
-  top:70px;
+
+ .ui-state-highlight{
+  background: #dc4b1a;
 }
