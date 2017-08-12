@@ -68,8 +68,8 @@
       <h4>温馨提示： 请登录后再预约</h4>
     </div>
     <!--styleClass="'ui-growl ui-growl-container ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title'"-->
-    <p-growl [(value)]="msgs" [style]="growlStyle" sticky="true"></p-growl>
-    <button type="button" pButton (click)="showMultiple()" label="Multiple" class="ui-button-warning"></button>
+    <p-growl [(value)]="msgs" [style]="growlStyle"></p-growl>
+    <!--<button type="button" pButton (click)="showMultiple()" label="Multiple" class="ui-button-warning"></button>-->
 
     <!--ui-growl-item ui-growl-icon-close ui-growl-image ui-growl-message ui-growl-title-->
     <div class="row schedule" *ngIf="!daSchedule">

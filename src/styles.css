@@ -30,3 +30,7 @@ html,body {
 a{
   cursor: pointer;
 }
+
+.ui-growl .ui-state-highlight{
+  background: #d9534f;
+}
