@@ -12,7 +12,7 @@ import {User} from "../../models/user";
 })
 export class InstrumentCardComponent implements OnInit {
   @Input() instrument: Instrument;
-  @Input() admins:User[];
+
   admin:User;
   constructor(
             private shareService: ShareService,
@@ -22,14 +22,7 @@ export class InstrumentCardComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.admins){
-      for (let i=0;i<this.admins.length;i++){
-        if (this.admins[i].id == this.instrument.admin){
-          this.admin = this.admins[i];
-          break;
-        }
-      }
-    }
+    this.restService.getAdmin(this.instrument.admin).subscribe((admins:User[])=>this.admin = admins[0])
   }
 
   viewDetail() {
@@ -38,6 +31,15 @@ export class InstrumentCardComponent implements OnInit {
     this.router.navigate([
       '/instrument/instrument-detail',
       this.instrument.id
+      // this.instrument.id
+      // {
+      //   outlets: {
+      //     instrumentOutlet: 'instrument-detail'
+      //   }
+      //   //departmentId: this.currentDepartmentID
+      // }
     ])
+
   }
+
 }
