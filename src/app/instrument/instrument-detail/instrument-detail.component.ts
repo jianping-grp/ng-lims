@@ -339,7 +339,8 @@ export class InstrumentDetailComponent implements OnInit {
     this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
 
     this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(now_time, this.event.start)
-        && this.isSameOrBefore(this.reservationStartTime, this.event.start) && !this.isConflicting;
+        && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
+        && !this.isConflicting;
 
     // this.errorStatusInfo(now_time)
       this.showErrorInfo()
@@ -353,7 +354,8 @@ export class InstrumentDetailComponent implements OnInit {
 
     this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
 
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
+    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(now_time, this.event.start)
+      && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
       && !this.isConflicting;
 
     // this.errorStatusInfo(now_time)
@@ -404,6 +406,7 @@ export class InstrumentDetailComponent implements OnInit {
     // 这些验证信息必须对应判断this.isSaved的信息。
     return this.errorsStatus = [
       {status:!this.isConflicting,message:{severity:'error', summary:'温馨提示', detail:'预约时间冲突'}},
+      {status:this.isSameOrBefore(now_time,this.event.start),message:{severity:'error', summary:'温馨提示', detail:'预约开始时间应在当前时间之后'}},
       {status:this.isBefore(this.event.start, this.event.end),message:{severity:'error', summary:'温馨提示', detail:'起始时间应早于结束时间'}},
       {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:{severity:'error', summary:'温馨提示', detail:`起始时间应晚于${this.min_sche}`}},
       {status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:{severity:'error', summary:'温馨提示', detail:`结束时间应早于${this.max_sche}`}}
@@ -418,15 +421,16 @@ export class InstrumentDetailComponent implements OnInit {
     const now_time = moment().format();
     this.msgs = [];
     if (this.currentUser){
-      if (this.isSameOrBefore(now_time,this.event.start)){
+      // if (this.isSameOrBefore(now_time,this.event.start)){
         this.errorStatusInfo(now_time).map((error)=>{
           if (!error.status){
             this.msgs.push(error.message)
           }
-          else {}
         })
-      }
-      else {}
+      // }
+      // else {
+      //   this.msgs.push({severity:'error', summary:'温馨提示', detail:'预约开始时间应在当前时间之后'})
+      // }
     }
     else {
       this.msgs.push({severity:'error', summary:'温馨提示', detail:'请登录后预约'})

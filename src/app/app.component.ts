@@ -7,4 +7,8 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'TJAB仪器管理平台';
+  constructor(){
+
+  }
+
 }

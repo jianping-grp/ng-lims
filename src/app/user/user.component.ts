@@ -32,11 +32,6 @@ export class UserComponent implements OnInit {
       user  => {
         this.currentUser = user;
         this.username = user? user.user_name : user;
-        // if (this.username){
-        //   this.getUserInfo(this.username);
-        // }
-        // this.userInfo = user? this.getUserInfo(user.user_name):user
-
       }
       );
     // this.limsRestService.getUser()
@@ -47,24 +42,13 @@ export class UserComponent implements OnInit {
     this.getUserReservation();
   }
 
-  // getUserInfo(){
-  //   if (!this.userInfo){
-  //     this.restService.getUser(this.currentUser.user_name).subscribe(
-  //       (users:User[])=> {
-  //         console.log(users[0]);
-  //         this.userInfo = users[0]
-  //       }
-  //     )
-  //   }
-  // }
   getUserReservation(){
-    if (!this.userInfo){
       this.restService.getReservationsByUser(this.username).subscribe(
         data=>{
+          console.log('获取预约历史')
         this.userInfo = data['users'][0];
         this.userReservations = data['reservations'];
       })
-    }
   }
 
   ngOnInit() {
