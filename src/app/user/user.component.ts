@@ -66,8 +66,12 @@ export class UserComponent implements OnInit {
   }
 
   logout(){
-    this.authenticationService.logout();
-    this.userInfo = null;
+
+    if (confirm('确认退出当前用户?')){
+      this.authenticationService.logout();
+      this.userInfo = null;
+      this.router.navigate(['/home'])
+    }
   }
 
 }

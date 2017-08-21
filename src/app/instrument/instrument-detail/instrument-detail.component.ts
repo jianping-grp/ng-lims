@@ -9,6 +9,7 @@ import {AuthenticationService} from "../../service/authentication.service";
 import {User} from "../../models/user";
 import {Message} from 'primeng/primeng';
 import {now} from "moment";
+import {InstrumentRecord} from "../../models/instrument-record";
 
 @Component({
   selector: 'app-instrument-detail',
@@ -16,78 +17,57 @@ import {now} from "moment";
   styleUrls: ['./instrument-detail.component.css']
 })
 export class InstrumentDetailComponent implements OnInit {
-  admin:User;
+  chartSchedule:boolean = false;
 
   currentUser:any;
-  username:string;
   userInfo:User;
+  admin:User;
 
   instrument: Instrument;
-  errorMsg: string;
 
   scheduleEvents: ScheduleReservation[];
-  event: ScheduleReservation;  // event为了跟html中的event交互； selecetedEvent为了记录当前选择了哪个event
   header: any;
-  dialogVisible: boolean = false;
   businessHours:any;
-
-  // timepicker
-  reservationStartTime:any;
-  reservationEndTime:any;
 
   // schedule
   min_sche: string;
   max_sche: string;
   event_Constraint: any;
 
-  isSaved: boolean;
-  isConflicting: boolean;
-  errorsStatus:any[];
-  daSchedule:boolean = false;
-
-
-  msgs: Message[] = [];
   growlStyle:any;
+  instrumentRecords:InstrumentRecord[]=[];
 
   constructor(
     private restService: LimsRestService,
     private activatedRoute: ActivatedRoute,
-    private router:Router,
-    private authenticationService:AuthenticationService
   ) {
     this.growlStyle = {
       'top':'70px'
     }
+    this.header = {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'month,agendaWeek,agendaDay listWeek'
+    };
   }
   ngOnInit() {
-
-    this.header = {
-      left: 'prev,next today myCustomButton',
-      center: 'title',
-      right: 'month,agendaWeek,agendaDay listWeek myCustomeButton'
-    };
-    let storedUser = JSON.parse(localStorage.getItem('currentUser'))
+    const storedUser = JSON.parse(localStorage.getItem('currentUser'))
     this.currentUser = storedUser;
-    this.username = storedUser? storedUser['user_name']: storedUser;
+    const username:string = storedUser? storedUser['user_name']: storedUser;
 
-    if (this.currentUser && this.username){
-      this.restService.getUser(this.username).subscribe(
+    if (this.currentUser && username){
+      this.restService.getUser(username).subscribe(
         user=>{
           console.log('我是登录的user:',user);
           this.userInfo=user[0]
         })
     }
-    // else {
-    //   alert('请重新登录')
-    // }
-
     this.activatedRoute.params
     // (+) converts string 'id' to a number
       .subscribe(
         (params: Params) => this.getInstrument(+params['id']),
         (err: Error) => console.log(err)
       );
-
   }
 
   getInstrument(id: number) {
@@ -96,10 +76,9 @@ export class InstrumentDetailComponent implements OnInit {
         ins_users => {
           this.instrument = ins_users['instrument'];
           this.admin = ins_users['users'][0];
-          this.getReservation(this.instrument.id);
           console.log(this.instrument.id)
         },
-        error => this.errorMsg = error,
+        error => {console.log('getInstrument method error:', error)},
         () => {
           this.min_sche = this.instrument.reservation_start_time ? this.instrument.reservation_start_time : '00:00';
           this.max_sche = this.instrument.reservation_end_time ? this.instrument.reservation_end_time : '24:00';
@@ -108,9 +87,21 @@ export class InstrumentDetailComponent implements OnInit {
             dow: [0,1,2,3,4,5,6],
             start: this.min_sche,
             end: this.max_sche
-          }
+          };
+          this.getInstrumentRecords(this.instrument.id);
         }
       );
+  }
+  getInstrumentRecords(instrumentId:number){
+    this.restService.getInstrumentRecords(instrumentId).subscribe(
+      (data:InstrumentRecord[])=>{
+      this.instrumentRecords = data;
+    },
+      error => {console.log('getInstrumentRecords method error:', error)},
+      ()=>{
+        this.getReservation(instrumentId);
+      }
+    )
   }
 
   getReservation(instrumentId: number) {
@@ -123,243 +114,75 @@ export class InstrumentDetailComponent implements OnInit {
           allReservations= data['reservations'];
           allUsers = data['users'];
           const now_time = moment().format();
-          allReservations.map(reservation => {
-            const event = new ScheduleReservation();
-            event.id = reservation.id;
-            event.userId = reservation.user;
-            allUsers.map((user)=>{
-              if (event.userId == user.id){
-                event.title = user.last_name+user.first_name;
-              }
-            });
-            event.start = reservation.start_time;
-            event.end = reservation.end_time;
+          this.instrumentRecords.map((instruRecord:InstrumentRecord)=>{
+            if (instruRecord.end_time && this.isBefore(instruRecord.end_time,now_time)){
+              const event = new ScheduleReservation();
+              // event.id = instruRecord.id;
+              event.userId = instruRecord.user;
 
-            if (this.userInfo && (this.userInfo['id'] == event.userId)){
-
-              if (this.isSameOrBefore(now_time,event.start)){
-                event.editable= true;
-                event.backgroundColor='#23d271';
+              for (let i=0;i<allUsers.length;i++){
+                if (event.userId == allUsers[i].id) {
+                  event.title = allUsers[i].last_name + allUsers[i].first_name;
+                  break;
+                }
               }
-              else {
-                event.editable = false;
-                event.backgroundColor='#939593';
+
+              event.start = instruRecord.start_time;
+              event.end = instruRecord.end_time;
+
+              event.editable = false;
+              event.backgroundColor = '#939593'; // 历史记录-真实使用时间
+
+              // 只显示过去3个月以来的日程安排；
+              const today = moment();
+              const lastMonths = today.subtract(3, 'months').format();
+              if (moment(event.start).isSameOrAfter(lastMonths)) {
+                this.scheduleEvents.push(event);
               }
             }
-            else {
-              if (this.isSameOrBefore(now_time,event.start)){
-                event.editable = false;
+          });
+          allReservations.map((reservation:Reservation) => {
+            if (this.isSameOrBefore(now_time,reservation.end_time)){
+              const event = new ScheduleReservation();
+              event.id = reservation.id;
+              event.userId = reservation.user;
+
+              for (let i=0;i<allUsers.length;i++){
+                if (event.userId == allUsers[i].id) {
+                  event.title = allUsers[i].last_name + allUsers[i].first_name;
+                  break;
+                }
+              }
+
+              event.start = reservation.start_time;
+              event.end = reservation.end_time;
+
+              if (this.userInfo && (this.userInfo['id'] == event.userId)) {
+
+                if (this.isSameOrBefore(now_time, event.start)) {
+                  event.editable = true;
+                  event.backgroundColor = '#23d271';
+                }
+                else {
+                  event.editable = true;
+                  event.startEditable=false;
+                  event.backgroundColor = '#db8272'; // 正在使用中
+                }
               }
               else {
-                event.editable = false;
-                event.backgroundColor='#939593';
+                if (this.isSameOrBefore(now_time, event.start)) {
+                  event.editable = false;
+                }
+                else {
+                  event.editable = false;
+                  event.backgroundColor = '#db8272'; // 正在使用中
+                }
               }
-            }
-
-
-            // 只显示过去三个月以来的日程安排；
-            const today = moment();
-            const lastMonths = today.subtract(3, 'months').format();
-            if (moment(event.start).isSameOrAfter(lastMonths)) {
-              this.scheduleEvents.push(event);
+                this.scheduleEvents.push(event);
             }
           })
         }
       )
-  }
-
-  handleDayClick(e) {
-    // this.dialogVisible = true;
-    this.event = new ScheduleReservation();
-    this.event.start =e.date?  e.date.format() : e.date.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
-    this.event.end = moment(this.event.start).add(1, 'h').format('YYYY-MM-DDTHH:mm:ss');
-    this.event.userId = this.userInfo? this.userInfo.id:null;
-    this.event.title = this.userInfo? (this.userInfo.last_name+this.userInfo.first_name):null;
-
-    const now_time = moment().format();
-    this.reservationStartTime = e.date.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
-    this.reservationEndTime = e.date.format('YYYY-MM-DD ') + this.instrument.reservation_end_time;
-
-    // 用户名和点击的事件名字相同，才可以保存。
-    if (this.currentUser && this.userInfo){
-      this.handleConflict(moment(this.event.start), moment(this.event.end), this.event['id'] || null);
-
-      if (this.isSameOrBefore(now_time,this.event.start)){
-        this.dialogVisible = true;
-        this.event.editable= true;
-
-        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(this.reservationStartTime, this.event.start)
-          && this.isSameOrBefore(this.event.end, this.reservationEndTime) && !this.isConflicting;
-      }
-      else {
-        this.dialogVisible = false;
-      }
-    }
-    else {
-      this.dialogVisible = false;
-    }
-    // this.errorStatusInfo(now_time)
-      this.showErrorInfo()
-  }
-
-  handleEventClick(e) {
-
-    this.event = new ScheduleReservation();
-    let start = e.calEvent.start;
-    let end = e.calEvent.end;
-    this.event.start = start ? start.format() : start.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
-    this.event.end = end ? end.format() : start.add(1, 'h').format();
-    this.event.id = e.calEvent.id;
-    this.event.title = e.calEvent.title;
-    this.event.userId = e.calEvent.userId;
-
-    // 解决 当前时间和当天可预约时间，哪个作为预约的最小时间。
-    const now_time = moment().format();
-    this.reservationStartTime = start.format('YYYY-MM-DD ') + this.instrument.reservation_start_time;
-    this.reservationEndTime = end.format('YYYY-MM-DD ') + this.instrument.reservation_end_time;
-
-    if (this.userInfo && (this.userInfo['id'] == this.event.userId)){
-      this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
-
-      if (this.isSameOrBefore(now_time,this.event.start)){
-        this.dialogVisible = true;
-        this.event.editable= true;
-
-        this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(this.reservationStartTime, this.event.start)
-          && this.isSameOrBefore(this.event.end, this.reservationEndTime) && !this.isConflicting;
-      }
-      else {
-        this.dialogVisible = false;
-      }
-    }
-    else {
-      this.dialogVisible = false;
-    }
-    // this.errorStatusInfo(now_time)
-      this.showErrorInfo()
-  }
-
-  handleDragResize(e) {
-    this.dialogVisible = false;
-    this.event = new ScheduleReservation();
-    this.event.id = e.event.id ? e.event.id : null;
-    this.event.userId = e.event.userId;
-    this.event.title = e.event.title;
-    let start = e.event.start;
-    let end = e.event.end;
-    this.event.start = start ? start.format() : null;
-    this.event.end = end ? end.format() : start.add(1, 'h').format();
-
-    const now_time = moment().format();
-    if (this.isSameOrBefore(now_time,e.event.start.format())){
-      const reservation={
-        start_time : e.event.start.format(),
-        end_time : e.event.end.format(),
-        id:e.event.id
-      };
-      this.restService.modifyReservation(e.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
-    }
-    else {
-      e.revertFunc()
-      let start = e.event.start;
-      let end = e.event.end;
-      this.event.start = start ? start.format() : null;
-      this.event.end = end ? end.format() : start.add(1, 'h').format();
-      this.event.editable = true;
-
-      let index: number = this.findEventIndexById(this.event.id);
-      if (index >= 0) {
-        this.event.backgroundColor='#23d271';
-        this.scheduleEvents[index] = this.event;
-      }
-    }
-  }
-
-  saveEvent() {
-    this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
-    if (this.event.id) {
-        let index: number = this.findEventIndexById(this.event.id);
-        if (index >= 0) {
-          this.event.backgroundColor='#23d271';
-          this.scheduleEvents[index] = this.event;
-
-          const reservation={
-            start_time : this.event.start,
-            end_time : this.event.end
-          };
-          this.restService.modifyReservation(this.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
-        }
-    }
-    //create
-    else {
-        const reservation = new Reservation();
-        reservation.user = this.userInfo.id;
-        reservation.start_time = this.event.start;
-        reservation.end_time = this.event.end;
-        reservation.instrument = this.instrument.id;
-        this.restService.createReservation(reservation).subscribe(data=> {
-          console.log('创建的新预约是：',data);
-          this.event.id = data['reservation']['id'];
-          this.event.backgroundColor='#23d271';
-          this.scheduleEvents.push(this.event)
-        })
-    }
-    this.isConflicting = false;
-    this.dialogVisible = false;
-  }
-
-  deleteEvent() {
-    let index: number = this.findEventIndexById(this.event.id);
-    if (index >= 0) {
-      this.scheduleEvents.splice(index, 1);
-      this.restService.deleteReservation(this.event.id).subscribe(data=>console.log('删除的预约为：',data))
-    }
-    this.dialogVisible = false;
-  }
-
-  findEventIndexById(id: any) {
-    let index = -1;
-    for (let i = 0; i < this.scheduleEvents.length; i++) {
-      if (id == this.scheduleEvents[i].id) {
-        index = i;
-        break;
-      }
-    }
-    return index;
-  }
-
-  // todo delete the former reservation; // todo 设置删除模式
-
-  setStart(e) {
-    // set the start time when pick the time
-    this.event.start = moment(e).format('YYYY-MM-DDTHH:mm:ss');
-
-    const now_time = moment().format();
-
-    this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
-
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(now_time, this.event.start)
-        && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
-        && !this.isConflicting;
-
-    // this.errorStatusInfo(now_time)
-      this.showErrorInfo()
-  }
-
-  setEnd(e) {
-    // set the end time when pick the time
-    this.event.end = moment(e).format('YYYY-MM-DDTHH:mm:ss');
-
-    const now_time = moment().format();
-
-    this.handleConflict(moment(this.event.start), moment(this.event.end), this.event.id);
-
-    this.isSaved = this.isBefore(this.event.start, this.event.end) && this.isSameOrBefore(now_time, this.event.start)
-      && this.isSameOrBefore(this.reservationStartTime, this.event.start) && this.isSameOrBefore(this.event.end, this.reservationEndTime)
-      && !this.isConflicting;
-
-    // this.errorStatusInfo(now_time)
-      this.showErrorInfo()
   }
 
   isBefore(one, another):boolean {
@@ -372,71 +195,10 @@ export class InstrumentDetailComponent implements OnInit {
     return pass ? pass : false;
   }
 
-  // 处理预约时间冲突;
-  handleConflict(startT?: moment.Moment, endT?: moment.Moment, id?: any) {
-    for (let i = 0; i < this.scheduleEvents.length; i++) {
-      const start = moment(this.scheduleEvents[i].start);
-      const end = moment(this.scheduleEvents[i].end);
-      const Id = this.scheduleEvents[i].id;
-      if (id !== Id) {
-        if (startT.isSame(start, 'd') && endT.isSame(end, 'd')) {
-          if (startT.isBetween(start, end) ||
-            endT.isBetween(start, end) ||
-            start.isBetween(startT, endT) ||
-            end.isBetween(startT, endT)
-          ) {
-            this.isConflicting = true;
-            break;
-          }
-          else {
-            this.isConflicting = false;
-          }
-        }
-        else {
-          this.isConflicting = false;
-        }
-      }
-      else {
-        this.isConflicting = false;
-      }
-    }
-  }
-
-  errorStatusInfo(now_time:any):any[]{
-    // 这些验证信息必须对应判断this.isSaved的信息。
-    return this.errorsStatus = [
-      {status:!this.isConflicting,message:{severity:'error', summary:'温馨提示', detail:'预约时间冲突'}},
-      {status:this.isSameOrBefore(now_time,this.event.start),message:{severity:'error', summary:'温馨提示', detail:'预约开始时间应在当前时间之后'}},
-      {status:this.isBefore(this.event.start, this.event.end),message:{severity:'error', summary:'温馨提示', detail:'起始时间应早于结束时间'}},
-      {status:this.isSameOrBefore(this.reservationStartTime, this.event.start),message:{severity:'error', summary:'温馨提示', detail:`起始时间应晚于${this.min_sche}`}},
-      {status:this.isSameOrBefore(this.event.end, this.reservationEndTime),message:{severity:'error', summary:'温馨提示', detail:`结束时间应早于${this.max_sche}`}}
-    ]
-  }
-
   toggle():void{
-    this.daSchedule = !this.daSchedule;
-  }
-
-  showErrorInfo(){
-    const now_time = moment().format();
-    this.msgs = [];
-    if (this.currentUser){
-      // if (this.isSameOrBefore(now_time,this.event.start)){
-        this.errorStatusInfo(now_time).map((error)=>{
-          if (!error.status){
-            this.msgs.push(error.message)
-          }
-        })
-      // }
-      // else {
-      //   this.msgs.push({severity:'error', summary:'温馨提示', detail:'预约开始时间应在当前时间之后'})
-      // }
-    }
-    else {
-      this.msgs.push({severity:'error', summary:'温馨提示', detail:'请登录后预约'})
-    }
+    this.chartSchedule = !this.chartSchedule;
   }
 
 }
 
-// todo:颜色区分，错误信息提示；
+

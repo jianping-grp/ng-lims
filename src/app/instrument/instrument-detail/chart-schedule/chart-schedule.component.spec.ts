@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DaScheduleComponent } from './da-schedule.component';
+import { DaScheduleComponent } from './chart-schedule.component';
 
 describe('DaScheduleComponent', () => {
   let component: DaScheduleComponent;

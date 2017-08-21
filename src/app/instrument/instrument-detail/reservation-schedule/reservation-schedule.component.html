@@ -1,0 +1,75 @@
+  <p-growl [(value)]="msgs" [style]="growlStyle"></p-growl>
+
+  <div class="reservation_sign">
+    <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #23d271"><label>当前用户的预约</label><br>
+    <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #3a87ad"><label>非当前用户预约</label><br>
+    <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #939593"><label>预约历史记录</label><br>
+    <input class="ui-colorpicker-preview ui-inputtext ui-state-default ui-corner-all ng-tns-c5-12" readonly style="background-color: #db8272"><label>正在使用中</label>
+  </div>
+  <div class="content-section implementation">
+    <p-schedule [events]="scheduleEvents"
+                [header]="header"
+                [editable]="false"
+                [allDaySlot]="false"
+                [eventOverlap]="false"
+                [eventConstraint]="event_Constraint"
+                [businessHours]="businessHours"
+                locale="zh-cn"
+                defaultView="agendaWeek"
+                nowIndicator="true"
+                (onEventClick)="handleEventClick($event)"
+                (onDayClick)="handleDayClick($event)"
+                (onEventDrop)="handleDrag($event)"
+                (onEventResize)="handleResize($event)"
+    >
+    </p-schedule>
+
+    <p-dialog header="预约详情" [(visible)]="dialogVisible" [responsive]="true" showEffect="fade" [modal]="false"
+              [contentStyle]="{'overflow':'visible'}"
+              [style]="{'overflow':'visible'}" [resizable]="false">
+      <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="event">
+        <div class="ui-grid-row">
+          <div class="ui-grid-col-4"><label>姓名</label></div>
+          <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="event.title" disabled/></div>
+        </div>
+        <div class="ui-grid-row">
+          <div class="ui-grid-col-4"><label>开始时间</label></div>
+          <!--<div class="ui-grid-col-8"><p-calendar [(ngModel)]="event.start" dateFormat="yy-mm-dd" dataType="string"></p-calendar></div>-->
+          <div class="ui-grid-col-8">
+            <input class="picker-input"
+                   pInputText
+                   dateTimePicker
+                   [value]="event.start | date:'yyyy-MM-dd | HH:mm:ss'"
+                   [(ngModel)]="event.start"
+                   (onChange)="setStart($event)"
+                   [mode]=" 'popup' "
+                   [pickerType]=" 'time' "
+                   readonly
+            >
+          </div>
+        </div>
+        <div class="ui-grid-row">
+          <div class="ui-grid-col-4"><label>结束时间</label></div>
+          <div class="ui-grid-col-8">
+            <input class="picker-input"
+                   pInputText
+                   dateTimePicker
+                   [value]="event.end | date:'yyyy-MM-dd | HH:mm:ss'"
+                   [(ngModel)]="event.end"
+                   (onChange)="setEnd($event)"
+                   [mode]=" 'popup' "
+                   [pickerType]=" 'time' "
+                   readonly
+            >
+          </div>
+        </div>
+      </div>
+      <p-footer>
+        <div class="ui-dialog-buttonpane ui-helper-clearfix">
+          <button type="button" pButton icon="fa-close" (click)="deleteEvent()" label="Delete"></button>
+          <button type="button" pButton icon="fa-check" (click)="saveEvent()" label="Save"
+                  [disabled]="!event?.start || !event?.end || !isSaved"></button>
+        </div>
+      </p-footer>
+    </p-dialog>
+  </div>

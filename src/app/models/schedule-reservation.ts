@@ -6,4 +6,5 @@ export class ScheduleReservation {
   end: string;
   backgroundColor:string;
   editable:boolean=false;
+  startEditable:boolean;
 }

@@ -8,6 +8,7 @@ import {Http, Response, Headers, ResponseOptions} from "@angular/http";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {InstrumentRecord} from "../models/instrument-record";
 
 @Injectable()
 export class LimsRestService {
@@ -87,14 +88,19 @@ export class LimsRestService {
   }
 
 
-  getReservations(instrumentId: number){
+  getReservations(instrumentId: number):Observable<any>{
     return this.fetchData(`reservations/?filter{instrument}=${instrumentId}&include[]=user.*`)
       .map((res:Response)=>res)
       .catch(this.handleError)
   }
-  getReservationsByUser(username: string){
+  getReservationsByUser(username: string):Observable<any>{
     return this.fetchData(`reservations/?include[]=user.*&filter{user.username}=${username}`)
       .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
+  getInstrumentRecords(instrumentId:number):Observable<InstrumentRecord[]>{
+    return this.fetchData(`instrument-record/?filter{instrument}=${instrumentId}`)
+      .map((res:Response)=>res['instrument_records'])
       .catch(this.handleError)
   }
 
