@@ -92,6 +92,7 @@ export class InstrumentDetailComponent implements OnInit {
         }
       );
   }
+
   getInstrumentRecords(instrumentId:number){
     this.restService.getInstrumentRecords(instrumentId).subscribe(
       (data:InstrumentRecord[])=>{
@@ -108,17 +109,23 @@ export class InstrumentDetailComponent implements OnInit {
     this.scheduleEvents = [];
     let allReservations:Reservation[]=[];
     let allUsers:User[]=[];
+
     this.restService.getReservations(instrumentId)
       .subscribe(
         (data)=> {
           allReservations= data['reservations'];
           allUsers = data['users'];
+console.log('data',data) // todo:allReservations只能获取到前10个
           const now_time = moment().format();
-          this.instrumentRecords.map((instruRecord:InstrumentRecord)=>{
-            if (instruRecord.end_time && this.isBefore(instruRecord.end_time,now_time)){
+          const today = moment();
+          const pastTime = today.subtract(3, 'months').format();
+
+          // 3个月之内的历史记录
+          for(let p=0; p<this.instrumentRecords.length;p++){
+            if (this.instrumentRecords[p].end_time && this.isBefore(this.instrumentRecords[p].end_time,now_time) && this.isBefore(pastTime,this.instrumentRecords[p].end_time)){
               const event = new ScheduleReservation();
-              // event.id = instruRecord.id;
-              event.userId = instruRecord.user;
+              // event.id = this.instrumentRecords[p].id;
+              event.userId = this.instrumentRecords[p].user;
 
               for (let i=0;i<allUsers.length;i++){
                 if (event.userId == allUsers[i].id) {
@@ -126,26 +133,23 @@ export class InstrumentDetailComponent implements OnInit {
                   break;
                 }
               }
-
-              event.start = instruRecord.start_time;
-              event.end = instruRecord.end_time;
-
+              event.start = this.instrumentRecords[p].start_time;
+              event.end = this.instrumentRecords[p].end_time;
               event.editable = false;
               event.backgroundColor = '#939593'; // 历史记录-真实使用时间
 
-              // 只显示过去3个月以来的日程安排；
-              const today = moment();
-              const lastMonths = today.subtract(3, 'months').format();
-              if (moment(event.start).isSameOrAfter(lastMonths)) {
+              if (moment(event.start).isSameOrAfter(pastTime)) {
                 this.scheduleEvents.push(event);
               }
             }
-          });
-          allReservations.map((reservation:Reservation) => {
-            if (this.isSameOrBefore(now_time,reservation.end_time)){
+          }
+
+          //当前时间之后的预约情况
+           for (let j=0;j<allReservations.length;j++) {
+            if (this.isSameOrBefore(now_time,allReservations[j].end_time)){
               const event = new ScheduleReservation();
-              event.id = reservation.id;
-              event.userId = reservation.user;
+              event.id = allReservations[j].id;
+              event.userId = allReservations[j].user;
 
               for (let i=0;i<allUsers.length;i++){
                 if (event.userId == allUsers[i].id) {
@@ -154,8 +158,8 @@ export class InstrumentDetailComponent implements OnInit {
                 }
               }
 
-              event.start = reservation.start_time;
-              event.end = reservation.end_time;
+              event.start = allReservations[j].start_time;
+              event.end = allReservations[j].end_time;
 
               if (this.userInfo && (this.userInfo['id'] == event.userId)) {
 
@@ -180,7 +184,8 @@ export class InstrumentDetailComponent implements OnInit {
               }
                 this.scheduleEvents.push(event);
             }
-          })
+          }
+          console.log(this.scheduleEvents)
         }
       )
   }
