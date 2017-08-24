@@ -2,7 +2,7 @@ import './rxjs-extensions';
 
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 
 import {AppComponent} from './app.component';
@@ -12,34 +12,39 @@ import {AboutModule} from './about/about.module';
 import {ErrorModule} from './error/error.module';
 import {ShareService} from './service/share.service';
 import {ScheduleModule} from 'primeng/primeng';
-import {UserModule} from './user/user.module';
 import {ShareModule} from './share/share.module';
 import {LimsRestService} from './service/lims-rest.service';
 import {AuthenticationService} from './service/authentication.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
+import {NgZorroAntdModule} from "ng-zorro-antd/src/release/ng-zorro-antd.module";
+import {UserComponent} from "./user/app-user/user.component";
+import {ModalModule} from "ngx-bootstrap";
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    NgZorroAntdModule.forRoot(),
     HomeModule,
     AboutModule,
     ErrorModule,
     ScheduleModule,
-    UserModule,
+    ModalModule.forRoot(),
     ShareModule,
     AppRoutingModule,
   ],
   providers: [
     LimsRestService,
-    ShareService,
-    AuthenticationService
+    ShareService
   ],
   bootstrap: [AppComponent]
 })

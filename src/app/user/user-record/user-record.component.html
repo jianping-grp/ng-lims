@@ -1,0 +1,43 @@
+<nz-root>
+  <div class="container">
+    <h3>历史记录</h3>
+    <ul class="list-unstyled row" *ngFor="let userReservation of userReservations">
+      <li><span class="col-md-2">仪器型号： {{userReservation.instrument}}</span>
+        <span class="col-md-3">起始时间： {{userReservation.start_time}}</span>
+        <span class="col-md-3">结束时间： {{userReservation.end_time}}</span>
+      </li><br>
+    </ul>
+    <hr>
+    <!--一些api不够成熟，有bug，比如nzPageIndexChange-->
+    <div class="col-md-offset-4 col-md-4">
+      <nz-pagination
+        [nzPageIndex]="meta_reservation?.page"
+        (nzPageIndexClickChange)="getReservationByPage($event)"
+        [nzTotal]="meta_reservation?.total_results"
+        nzShowTotal
+      >
+      </nz-pagination>
+    </div>
+  </div>
+
+  <div class="container">
+    <h3>真实操作时间</h3>
+    <ul class="list-unstyled row" *ngFor="let userRecord of userRecords">
+      <li><span class="col-md-2">仪器型号： {{userRecord.instrument}}</span>
+        <span class="col-md-3">起始时间： {{userRecord.start_time}}</span>
+        <span class="col-md-3">结束时间： {{userRecord.end_time}}</span>
+      </li><br>
+    </ul>
+    <hr>
+    <!--一些api不够成熟，有bug，比如nzPageIndexChange-->
+    <div class="col-md-offset-4 col-md-4">
+      <nz-pagination
+        [nzPageIndex]="meta_record?.page"
+        (nzPageIndexClickChange)="getRecordsByPage($event)"
+        [nzTotal]="meta_record?.total_results"
+        nzShowTotal
+      >
+      </nz-pagination>
+    </div>
+  </div>
+</nz-root>

@@ -1,21 +1,25 @@
 import {Injectable} from '@angular/core';
 import {Department} from '../models/department';
 import {User} from '../models/user';
-import {Instrument} from '../models/instrument';
-import {Reservation} from '../models/reservation';
+
 import {Observable} from "rxjs/Observable";
-import {Http, Response, Headers, ResponseOptions} from "@angular/http";
+import {Response} from "@angular/http";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {InstrumentRecord} from "../models/instrument-record";
+import {Subject} from "rxjs/Subject";
 
 @Injectable()
 export class LimsRestService {
-  private restUrl = 'http://localhost:8000/api'
+  private restUrl = 'http://localhost:8000/api';
+  private authUrl:string = `${this.restUrl}/auth`;
+  currentUser:Subject<any>;
+
   constructor(
     private http: HttpClient
   ) {
+    this.currentUser = new Subject();
   }
 
   private fetchData(url: string){
@@ -43,7 +47,6 @@ export class LimsRestService {
 
 
 
-// todo:修改http.get.map
   getDepartmentList(): Observable<Department[]> {
     return this.fetchData('departments')
       .map((res:Response)=>res['departments'])
@@ -56,19 +59,25 @@ export class LimsRestService {
       .catch(this.handleError)
   }
 
-  // todo: 修改http.get.map
-  getInstrumentList(): Observable<any> {
-    return this.fetchData(`instruments/?include[]=admin.*`)
-      .map((res:Response)=>res)
-      .catch(this.handleError);
+  getInstrumentListByDepartment(departmentID: number, page:number): Observable<any> {
+    if (departmentID === 0) {
+      return this.fetchData(`instruments/?include[]=admin.*&page=${page}&sort[]=id`)
+        .map((res:Response)=>res)
+        .catch(this.handleError);
+    }
+    else {
+      return this.fetchData(`instruments/?filter{department}=${departmentID}&include[]=admin.*&page=${page}&sort[]=id`)
+        .map((res:Response)=>res)
+        .catch(this.handleError)
+    }
   }
 
-  getAdmin(adminID: number){
-    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
-    return this.http.get(`${this.restUrl}/users/?filter{id}=${adminID}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
-      .map((res:Response)=>res['users'])
-      .catch(this.handleError)
-  }
+  // getAdmin(adminID: number){
+  //   let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+  //   return this.http.get(`${this.restUrl}/users/?filter{id}=${adminID}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+  //     .map((res:Response)=>res['users'])
+  //     .catch(this.handleError)
+  // }
   getUser(username:string): Observable<User[]>{
     let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
     return this.http.get(`${this.restUrl}/users/?filter{username}=${username}`,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
@@ -76,16 +85,7 @@ export class LimsRestService {
       .catch(this.handleError)
   }
 
-  getInstrumentListByDepartment(departmentID: number): Observable<any> {
-    if (departmentID === 0) {
-      return this.getInstrumentList();
-    }
-    else {
-      return this.fetchData(`instruments/?filter{department}=${departmentID}&include[]=admin.*`)
-        .map((res:Response)=>res)
-        .catch(this.handleError)
-    }
-  }
+
 
 
   getReservations(instrumentId: number):Observable<any>{
@@ -93,27 +93,27 @@ export class LimsRestService {
       .map((res:Response)=>res)
       .catch(this.handleError)
   }
-  getReservationsByUser(username: string):Observable<any>{
-    return this.fetchData(`reservations/?include[]=user.*&filter{user.username}=${username}`)
-      .map((res:Response)=>res)
-      .catch(this.handleError)
-  }
+  // getReservationsByUser(username: string,page:number):Observable<any>{
+  //   return this.fetchData(`reservations/?include[]=user.*&filter{user.username}=${username}&page=${page}`)
+  //     .map((res:Response)=>res)
+  //     .catch(this.handleError)
+  // }
+
   getInstrumentRecords(instrumentId:number):Observable<InstrumentRecord[]>{
     return this.fetchData(`instrument-record/?filter{instrument}=${instrumentId}`)
       .map((res:Response)=>res['instrument_records'])
       .catch(this.handleError)
   }
-
-  // private extractDataList(res: Response) {
-  //   let body = res.json();
-  //   console.log('body:',body)
-  //   return body || {};
-  // }
-
-  // private extractData(res: Response) {
-  //   let body = res.json();
-  //   return body || {};
-  // }
+  getReservationsByPage(username: string,page:number):Observable<any>{
+    return this.fetchData(`reservations/?filter{user.username}=${username}&page=${page}&sort[]=-start_time`)
+      .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
+  getInstrumentRecordsByPage(username:string,page:number):Observable<any>{
+    return this.fetchData(`instrument-record/?filter{user.username}=${username}&page=${page}&sort[]=-start_time`)
+      .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
 
   private handleError(error: Response | any) {
     // we might use a remote logging infrastructure
@@ -127,6 +127,40 @@ export class LimsRestService {
     }
     console.error(errMsg);
     return Promise.reject(errMsg);
+  }
+
+  login(username: string, password: string):Observable<any> {
+    return this.http.post(`${this.authUrl}/login/`, {username: username, password: password})
+      .map((res: Response) => {
+        if (res && res['auth_token']) {
+          let user = {
+            user_token:res['auth_token'],
+            user_name:username
+          };
+          console.log('Login token:',user)
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          this.currentUser.next(user);
+          return user;
+        }
+        else {
+          return null;
+        }
+      })
+  }
+
+
+  logout() :void{
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    this.http.post(`${this.authUrl}/logout/`,{},{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+
+    localStorage.removeItem('currentUser');
+    let removedToken = localStorage.getItem('currentUser');
+    this.currentUser.next(removedToken);
+  }
+
+  registry(body:any){
+    return this.http.post(`${this.authUrl}/register/`,body)
+      .map((res:Response)=>res)
   }
 
 }

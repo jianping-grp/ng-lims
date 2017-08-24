@@ -14,7 +14,7 @@ const routes: Routes = [
         component: InstrumentListComponent,
       },
       {
-        path: "instrument-list",
+        path: "instrument-list/:department",
         component: InstrumentListComponent
         //outlet: "instrumentOutlet"
       },

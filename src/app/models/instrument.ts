@@ -21,7 +21,7 @@ export class Instrument {
   reservation_start_time: string;
   reservation_end_time: string;
   charge_type: ChargeType | number;
-  manufacturer: Manufacturer | number;
+  manufacturer: Manufacturer;
   model: string;
   links:any;
 }

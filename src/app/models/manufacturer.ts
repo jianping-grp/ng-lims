@@ -1,10 +1,10 @@
 export class Manufacturer {
   id: number;
-  englishName: string;
-  chineseName: string;
+  english_name: string;
+  chinese_name: string;
 
   getName():string {
-    return this.chineseName || this.englishName;
+    return this.chinese_name || this.english_name;
   }
 
 }

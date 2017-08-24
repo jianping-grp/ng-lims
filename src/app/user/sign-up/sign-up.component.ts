@@ -1,7 +1,7 @@
 import { Component} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {AuthenticationService} from "../../service/authentication.service";
 import {Router} from "@angular/router";
+import {LimsRestService} from "../../service/lims-rest.service";
 
 function passwordMatcher(c:AbstractControl){
   if (!c.get('password') || !c.get('confirm'))return null;
@@ -21,7 +21,7 @@ export class SignUpComponent{
 
   constructor(
     private fb: FormBuilder,
-    private authenticationService:AuthenticationService,
+    private restService:LimsRestService,
     private router:Router
   ) {
     this.signUpForm = this.fb.group({
@@ -118,20 +118,7 @@ export class SignUpComponent{
       'maxlength':'必须是11位手机号码;'
     },
   };
-  // usernameSend(){
-  //   const form = this.signUpForm.value;
-  //   const body = {
-  //     username:form.username
-  //   }
-  //   this.authenticationService.registry(body).subscribe(
-  //     data=>{},
-  //     err=>{
-  //       if (err.error.username){
-  //         alert(err.error.username)
-  //       }
-  //     }
-  //   )
-  // }
+
 
   onSubmit(){
     const form = this.signUpForm.value
@@ -143,7 +130,7 @@ export class SignUpComponent{
       email:form.email,
       phone:form.phone
     }
-    this.authenticationService.registry(body).subscribe(
+    this.restService.registry(body).subscribe(
       data=>{
         console.log(data);
         alert('注册成功');

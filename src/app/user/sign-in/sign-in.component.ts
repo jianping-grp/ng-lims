@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Form} from "@angular/forms";
 import {AuthenticationService} from "../../service/authentication.service";
 import {Router} from "@angular/router";
+import {LimsRestService} from "../../service/lims-rest.service";
 
 @Component({
   selector: 'app-sign-in',
@@ -13,10 +14,10 @@ export class SignInComponent {
   user_token:string;
 
   constructor(
-    private authenticationService: AuthenticationService,
+    private restService:LimsRestService,
     private router:Router
   ) {
-    this.authenticationService.currentUser.subscribe(
+    this.restService.currentUser.subscribe(
       user  => {
         this.currentUser = user;
         // this.username = user? user.user_name : user;
@@ -31,7 +32,7 @@ export class SignInComponent {
   signInForm: Form;
 
   signIn(){
-    this.authenticationService.login(this.username, this.password)
+    this.restService.login(this.username, this.password)
       .subscribe(
         // todo add return url, or user page
         user => {

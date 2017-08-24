@@ -1,15 +1,11 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Instrument} from "../../models/instrument";
 import {LimsRestService} from "../../service/lims-rest.service";
-import {ShareService} from "../../service/share.service";
-import {ActivatedRoute, ActivatedRouteSnapshot, ParamMap, Params} from "@angular/router";
+import {ActivatedRoute, Params} from "@angular/router";
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/do';
-import {Observable} from "rxjs/Observable";
-import {Department} from "../../models/department";
-import {isUndefined} from "util";
 import {User} from "../../models/user";
-import {Subject} from "rxjs/Subject";
+import {Meta} from "../../models/meta";
 
 @Component({
   selector: 'app-instrument-list',
@@ -19,60 +15,44 @@ import {Subject} from "rxjs/Subject";
 export class InstrumentListComponent implements OnInit {
   instrumentList: Instrument[];
   admins:User[];
-  instruments_admins:any;
   errorMsg: string;
 
+  meta:Meta;
+
+  departmentId:number;
+
   constructor(private restService: LimsRestService,
-              private route: ActivatedRoute) {
+              private activatedRoute: ActivatedRoute) {
   }
 
   ngOnInit() {
     console.log('instrument list init...')
-    this.route.params
+    this.activatedRoute.params
       .subscribe(
         (params: Params) => {
-          this.getInstrumentListByDepartment(+params['department'])
+          this.departmentId = +params['department'];
+          this.getInstrumentListByDepartment(this.departmentId);
+
         }
       )
   }
 
-  getInstrumentListByDepartment(departmentId: number) {
+  getInstrumentListByDepartment(departmentId: number,e?:number) {
     console.log(`get instrument list (department id ${departmentId})`)
     // all instruments
-
+      e = e ? e : 1;
       if (isNaN(departmentId)) {
         departmentId = 0;
       }
-
-      if (departmentId === 0) {
-          this.restService.getInstrumentList()
-            .subscribe(
-              data => {
-                // localStorage.setItem('instruments_admins',JSON.stringify(data));
-                // this.instruments_admins.next(data)
-                this.instruments_admins = data;
-                this.admins = data['users'];
-                this.instrumentList = data['instruments'];
-              },
-              error => this.errorMsg = <any> error
-            )
-        // else {
-        //   this.admins = this.instruments_admins['users'];
-        //   this.instrumentList = this.instruments_admins['instruments'];
-        // }
-      }
-      else {
-        this.restService.getInstrumentListByDepartment(departmentId)
-          .subscribe(
-            data => {
-              this.instruments_admins = data;
-              this.admins = data['users'];
-              this.instrumentList = data['instruments'];
-            },
-            error => this.errorMsg = <any> error
-          )
-      }
-
+      this.restService.getInstrumentListByDepartment(departmentId,e)
+        .subscribe(
+          data => {
+            this.admins = data['users'];
+            this.instrumentList = data['instruments'];
+            this.meta = data['meta'];
+          },
+          error => this.errorMsg = <any> error
+        )
   }
 
 }

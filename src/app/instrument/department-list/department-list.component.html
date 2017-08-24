@@ -2,9 +2,9 @@
   <div class="panel-heading"><h5>{{title}}</h5></div>
   <div class="panel-body">
     <ul class="nav nav-stacked">
-      <li><a [routerLink]="['instrument-list', {department: 0}]" routerLinkActive="selected">所有平台</a> </li>
+      <li><a [routerLink]="['./instrument-list',  0]" routerLinkActive="selected">所有平台</a> </li>
       <li *ngFor="let department of departmentList">
-        <a [routerLink]="['instrument-list', {department: department.id}]" routerLinkActive="selected">{{department.name}}</a>
+        <a [routerLink]="['./instrument-list', department.id]" routerLinkActive="selected">{{department.name}}</a>
       </li>
     </ul>
 

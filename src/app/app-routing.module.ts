@@ -3,8 +3,6 @@ import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 import {HomeComponent} from "./home/home/home.component";
 import {PageNotFoundComponent} from "./error/page-not-found/page-not-found.component";
-import {SignInComponent} from "./user/sign-in/sign-in.component";
-import {SignUpComponent} from "./user/sign-up/sign-up.component";
 
 const routes: Routes = [
   {
@@ -17,12 +15,8 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'sign-in',
-    component: SignInComponent
-  },
-  {
-    path: 'sign-up',
-    component: SignUpComponent
+    path:'user-center',
+    loadChildren: 'app/user/user.module#UserModule',
   },
   {
     path: 'instrument',

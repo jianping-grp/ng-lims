@@ -1,0 +1,8 @@
+<ul class="list-unstyled row">
+  <li><span class="col-md-2">用户名：</span> <span class="col-md-3">{{userInfo?.username}}</span></li><br>
+  <li><span class="col-md-2">姓名：</span> <span class="col-md-3">{{userInfo?.last_name+userInfo?.first_name}}</span></li><br>
+  <li><span class="col-md-2">密码：</span> <span class="col-md-3">****** <a [routerLink]="['../change-password']">修改密码？</a></span></li><br>
+  <li><span class="col-md-2">注册时间：</span> <span class="col-md-3">{{userInfo?.date_joined | date: 'short'}}</span></li><br>
+  <li><span class="col-md-2">最后登录时间：</span> <span class="col-md-3">{{userInfo?.last_login | date: 'short'}}</span></li><br>
+  <li><span class="col-md-2">电话号码：</span> <span class="col-md-3">{{userInfo?.phone}}</span></li><br>
+</ul>
