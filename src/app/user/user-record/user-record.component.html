@@ -1,43 +1,97 @@
 <nz-root>
-  <div class="container">
-    <h3>历史记录</h3>
-    <ul class="list-unstyled row" *ngFor="let userReservation of userReservations">
-      <li><span class="col-md-2">仪器型号： {{userReservation.instrument}}</span>
-        <span class="col-md-3">起始时间： {{userReservation.start_time}}</span>
-        <span class="col-md-3">结束时间： {{userReservation.end_time}}</span>
-      </li><br>
-    </ul>
-    <hr>
-    <!--一些api不够成熟，有bug，比如nzPageIndexChange-->
-    <div class="col-md-offset-4 col-md-4">
-      <nz-pagination
-        [nzPageIndex]="meta_reservation?.page"
-        (nzPageIndexClickChange)="getReservationByPage($event)"
-        [nzTotal]="meta_reservation?.total_results"
-        nzShowTotal
-      >
-      </nz-pagination>
-    </div>
-  </div>
 
-  <div class="container">
-    <h3>真实操作时间</h3>
-    <ul class="list-unstyled row" *ngFor="let userRecord of userRecords">
-      <li><span class="col-md-2">仪器型号： {{userRecord.instrument}}</span>
-        <span class="col-md-3">起始时间： {{userRecord.start_time}}</span>
-        <span class="col-md-3">结束时间： {{userRecord.end_time}}</span>
-      </li><br>
-    </ul>
-    <hr>
-    <!--一些api不够成熟，有bug，比如nzPageIndexChange-->
-    <div class="col-md-offset-4 col-md-4">
-      <nz-pagination
-        [nzPageIndex]="meta_record?.page"
-        (nzPageIndexClickChange)="getRecordsByPage($event)"
-        [nzTotal]="meta_record?.total_results"
-        nzShowTotal
-      >
-      </nz-pagination>
+    <div class="card-outer">
+      <nz-card class="card-class">
+        <ng-template #title>
+          <h4>预约记录 ( {{months_record}} 个月之内)</h4>
+        </ng-template>
+        <ng-template #body>
+
+          <nz-table #nzTable
+                    [nzAjaxData]="userReservations"
+                    [nzPageSize]="10"
+                    [nzShowTotal]="true"
+                    [nzLoading]="_loading"
+                    [nzTotal]="_total"
+                    [(nzPageIndex)]="_current"
+                    (nzPageIndexChange)="_refreshData()"
+          >
+            <thead nz-thead>
+            <tr>
+              <th nz-th>
+            <span>
+              仪器编号
+            </span>
+              </th>
+              <th nz-th>
+            <span>
+              开始时间
+              <nz-table-sort [(nzValue)]="ageSort" (nzValueChange)="ageSortChange($event)"></nz-table-sort>
+            </span>
+              </th>
+              <th nz-th><span>结束时间</span></th>
+            </tr>
+            </thead>
+            <tbody nz-tbody>
+            <tr nz-tbody-tr *ngFor="let userReservation of nzTable.data">
+              <td nz-td>
+                <a [routerLink]="['/instrument/instrument-detail',userReservation.instrument]">{{userReservation.instrument}}</a>
+              </td>
+              <td nz-td>{{userReservation.start_time | date:'short'}}</td>
+              <td nz-td>{{userReservation.end_time | date:'short'}}</td>
+            </tr>
+            </tbody>
+          </nz-table>
+
+
+        </ng-template>
+      </nz-card>
+
+      <nz-card class="card-class">
+        <ng-template #title>
+          <h4>使用记录 ( {{months_record}} 个月之内)</h4>
+        </ng-template>
+        <ng-template #body>
+          <nz-table #nzTable
+                    [nzAjaxData]="userRecords"
+                    [nzPageSize]="10"
+                    [nzShowTotal]="true"
+                    [nzLoading]="_loading2"
+                    [nzTotal]="_total2"
+                    [(nzPageIndex)]="_current2"
+                    (nzPageIndexChange)="_refreshData2()"
+          >
+            <thead nz-thead>
+            <tr>
+              <th nz-th>
+            <span>
+              仪器编号
+            </span>
+              </th>
+              <th nz-th>
+            <span>
+              开始时间
+              <nz-table-sort [(nzValue)]="ageSort" (nzValueChange)="ageSortChange2($event)"></nz-table-sort>
+            </span>
+              </th>
+              <th nz-th><span>结束时间</span></th>
+            </tr>
+            </thead>
+            <tbody nz-tbody>
+            <tr nz-tbody-tr *ngFor="let userRecord of nzTable.data">
+              <td nz-td>
+                <a [routerLink]="['/instrument/instrument-detail',userRecord.instrument]">{{userRecord.instrument}}</a>
+              </td>
+              <td nz-td>{{userRecord.start_time | date:'short'}}</td>
+              <td nz-td>{{userRecord.end_time | date:'short'}}</td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </ng-template>
+      </nz-card>
+
     </div>
-  </div>
+
+
+
 </nz-root>

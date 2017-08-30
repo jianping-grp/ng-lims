@@ -131,14 +131,6 @@ export class ReservationScheduleComponent{
 
   handleDrag(e) {
     this.dialogVisible = false;
-    this.event = new ScheduleReservation();
-    this.event.id = e.event.id ? e.event.id : null;
-    this.event.userId = e.event.userId;
-    this.event.title = e.event.title;
-    let start = e.event.start;
-    let end = e.event.end;
-    this.event.start = start ? start.format() : null;
-    this.event.end = end ? end.format() : start.add(1, 'h').format();
 
     const now_time = moment().format();
     if (this.isSameOrBefore(now_time,e.event.start.format())){
@@ -150,7 +142,11 @@ export class ReservationScheduleComponent{
       this.restService.modifyReservation(e.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
     }
     else {
-      e.revertFunc()
+      e.revertFunc();
+      this.event = new ScheduleReservation();
+      this.event.id = e.event.id ? e.event.id : null;
+      this.event.userId = e.event.userId;
+      this.event.title = e.event.title;
       let start = e.event.start;
       let end = e.event.end;
       this.event.start = start ? start.format() : null;
@@ -163,16 +159,41 @@ export class ReservationScheduleComponent{
         this.scheduleEvents[index] = this.event;
       }
     }
+    console.log(this.event)
   }
 
   handleResize(e){
     this.dialogVisible = false;
-    const reservation={
-      start_time : e.event.start.format(),
-      end_time : e.event.end.format(),
-      id:e.event.id
-    };
-    this.restService.modifyReservation(e.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
+
+    const now_time = moment().format();
+    if (this.isSameOrBefore(now_time,e.event.end.format())){
+      const reservation={
+        start_time : e.event.start.format(),
+        end_time : e.event.end.format(),
+        id:e.event.id
+      };
+      this.restService.modifyReservation(e.event.id,reservation).subscribe(data=>console.log('修改的预约为：',data))
+    }
+    else {
+      e.revertFunc();
+      this.event = new ScheduleReservation();
+      this.event.id = e.event.id ? e.event.id : null;
+      this.event.userId = e.event.userId;
+      this.event.title = e.event.title;
+      let start = e.event.start;
+      let end = e.event.end;
+      this.event.start = start ? start.format() : null;
+      this.event.end = end ? end.format() : start.add(1, 'h').format();
+      this.event.editable = true;
+      this.event.startEditable=false;
+
+      let index: number = this.findEventIndexById(this.event.id);
+      if (index >= 0) {
+        this.event.backgroundColor='#db8272';
+        this.scheduleEvents[index] = this.event;
+      }
+    }
+    console.log(this.event)
   }
 
   saveEvent() {

@@ -9,13 +9,26 @@
     </div>
   </div>
   <hr />
-  <div *ngIf="meta?.total_results" class="col-lg-offset-4 col-lg-4">
+  <div *ngIf="meta?.total_results" class="pagination-class">
     <nz-pagination
       [nzPageIndex]="meta?.page"
+      [(nzPageSize)]="_pageSize"
+      (nzPageSizeChange)="getInstrumentListByDepartment(departmentId,$event)"
       (nzPageIndexClickChange)="getInstrumentListByDepartment(departmentId,$event)"
       [nzTotal]="meta?.total_results"
       nzShowTotal
     >
     </nz-pagination>
   </div>
+
+  <!--<div *ngIf="_total" class="col-lg-offset-4 col-lg-5">-->
+    <!--<nz-pagination-->
+      <!--[(nzPageIndex)]="_current"-->
+      <!--[nzPageSize]="3"-->
+      <!--(nzPageIndexChange)="getInstrumentListByDepartment()"-->
+      <!--[nzTotal]="_total"-->
+      <!--nzShowTotal-->
+    <!--&gt;-->
+    <!--</nz-pagination>-->
+  <!--</div>-->
 </nz-root>

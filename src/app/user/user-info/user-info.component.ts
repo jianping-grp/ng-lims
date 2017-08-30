@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {AuthenticationService} from "../../service/authentication.service";
 import {LimsRestService} from "../../service/lims-rest.service";
 import {User} from "../../models/user";
 

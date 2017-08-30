@@ -17,6 +17,7 @@ const routes: Routes = [
   {
     path:'user-center',
     loadChildren: 'app/user/user.module#UserModule',
+    data: {preload:true}
   },
   {
     path: 'instrument',

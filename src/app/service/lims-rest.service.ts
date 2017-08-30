@@ -7,7 +7,6 @@ import {Response} from "@angular/http";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {InstrumentRecord} from "../models/instrument-record";
 import {Subject} from "rxjs/Subject";
 
 @Injectable()
@@ -59,14 +58,14 @@ export class LimsRestService {
       .catch(this.handleError)
   }
 
-  getInstrumentListByDepartment(departmentID: number, page:number): Observable<any> {
+  getInstrumentListByDepartment(departmentID: number, page:number,pageSize:number): Observable<any> {
     if (departmentID === 0) {
-      return this.fetchData(`instruments/?include[]=admin.*&page=${page}&sort[]=id`)
+      return this.fetchData(`instruments/?include[]=admin.*&page=${page}&per_page=${pageSize}&sort[]=id`)
         .map((res:Response)=>res)
         .catch(this.handleError);
     }
     else {
-      return this.fetchData(`instruments/?filter{department}=${departmentID}&include[]=admin.*&page=${page}&sort[]=id`)
+      return this.fetchData(`instruments/?filter{department}=${departmentID}&include[]=admin.*&page=${page}&per_page=${pageSize}&sort[]=id`)
         .map((res:Response)=>res)
         .catch(this.handleError)
     }
@@ -86,10 +85,14 @@ export class LimsRestService {
   }
 
 
+  getInstrumentRecords(instrumentId:number,start:string):Observable<any>{
+    return this.fetchData(`instrument-records/?filter{instrument}=${instrumentId}&filter{start_time.gte}=${start}&per_page=999&include[]=user.*`)
+      .map((res:Response)=>res)
+      .catch(this.handleError)
+  }
 
-
-  getReservations(instrumentId: number):Observable<any>{
-    return this.fetchData(`reservations/?filter{instrument}=${instrumentId}&include[]=user.*`)
+  getReservations(instrumentId: number,start:string):Observable<any>{
+    return this.fetchData(`reservations/?filter{instrument}=${instrumentId}&filter{start_time.gte}=${start}&per_page=999&include[]=user.*`)
       .map((res:Response)=>res)
       .catch(this.handleError)
   }
@@ -99,18 +102,14 @@ export class LimsRestService {
   //     .catch(this.handleError)
   // }
 
-  getInstrumentRecords(instrumentId:number):Observable<InstrumentRecord[]>{
-    return this.fetchData(`instrument-record/?filter{instrument}=${instrumentId}`)
-      .map((res:Response)=>res['instrument_records'])
-      .catch(this.handleError)
-  }
-  getReservationsByPage(username: string,page:number):Observable<any>{
-    return this.fetchData(`reservations/?filter{user.username}=${username}&page=${page}&sort[]=-start_time`)
+
+  getReservationsByPage(username: string,page:number,start:string):Observable<any>{
+    return this.fetchData(`reservations/?filter{user.username}=${username}&filter{start_time.gte}=${start}&page=${page}&sort[]=-start_time`)
       .map((res:Response)=>res)
       .catch(this.handleError)
   }
-  getInstrumentRecordsByPage(username:string,page:number):Observable<any>{
-    return this.fetchData(`instrument-record/?filter{user.username}=${username}&page=${page}&sort[]=-start_time`)
+  getInstrumentRecordsByPage(username:string,page:number,start:string):Observable<any>{
+    return this.fetchData(`instrument-records/?filter{user.username}=${username}&filter{start_time.gte}=${start}&page=${page}&sort[]=-start_time`)
       .map((res:Response)=>res)
       .catch(this.handleError)
   }
@@ -161,6 +160,12 @@ export class LimsRestService {
   registry(body:any){
     return this.http.post(`${this.authUrl}/register/`,body)
       .map((res:Response)=>res)
+  }
+  changePassword(body:any){
+    let storedUser = JSON.parse(localStorage.getItem('currentUser')) ;
+    return this.http.post(`${this.authUrl}/password/`,body,{headers:new HttpHeaders().set('Authorization',`Token ${storedUser['user_token']}`)})
+      .map((res:Response)=>res)
+      .catch(this.handleError)
   }
 
 }

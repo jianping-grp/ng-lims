@@ -1,12 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output, TemplateRef} from '@angular/core';
 import {User} from "../../models/user";
-import {AuthenticationService} from "../../service/authentication.service";
 import {LimsRestService} from "../../service/lims-rest.service";
 import {Router} from "@angular/router";
-import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
-import {Reservation} from "../../models/reservation";
-import {Meta} from "../../models/meta";
-import {InstrumentRecord} from "../../models/instrument-record";
+
 
 @Component({
   selector: 'app-user',
@@ -18,6 +14,7 @@ export class UserComponent implements OnInit {
   username:string;
 
   userInfo:User;
+  isVisibleTop:boolean;
   constructor(
     private restService:LimsRestService,
     private router:Router,
@@ -36,6 +33,22 @@ export class UserComponent implements OnInit {
   ngOnInit() {
   }
 
+  // getUser(){
+  //   this.isVisibleTop = true;
+  //   this.restService.getUser(this.username).subscribe((users:User[])=>{
+  //     this.userInfo = users[0];
+  //   })
+  // }
+  // handleOkTop (e) {
+  //   console.log('点击了确定');
+  //   this.isVisibleTop = false;
+  // }
+  //
+  // handleCancelTop (e) {
+  //   console.log('取消');
+  //   this.isVisibleTop = false;
+  // }
+
   gotoLogin(){
     // localStorage.setItem('currentPage',location.href);
     if (location.href == 'http://localhost:4200/user-center/sign-up'){
@@ -51,7 +64,7 @@ export class UserComponent implements OnInit {
 
     if (confirm('确认退出当前用户?')){
       this.restService.logout();
-      this.userInfo = null;
+      // this.userInfo = null;
       this.router.navigate(['/home'])
     }
   }

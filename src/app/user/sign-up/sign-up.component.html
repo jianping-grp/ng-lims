@@ -1,80 +1,97 @@
-
-<form class="form-horizontal well-lg" [formGroup]="signUpForm" (ngSubmit)="onSubmit()" novalidate>
-  <div class=" panel-heading">
-    <h4>欢迎注册使用TJAB仪器管理平台</h4>
-  </div>
-  <div class="well">
-    <div class="form-group">
-      <label for="username" class="col-lg-3 control-label">用户名:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="text" name="username" id="username" formControlName="username" placeholder="请输入用户名">
-        <span *ngIf="formErrors.username" class="alert alert-danger">{{formErrors.username}}</span>
-        <span *ngIf="signUpForm.get('username').valid" class="glyphicon glyphicon-ok"></span>
+<nz-root>
+<h4>欢迎注册使用TJAB仪器管理平台</h4>
+<hr>
+  <form nz-form [formGroup]="signUpForm" class="form-class" (ngSubmit)="onSubmit()">
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="username" nz-form-item-required>
+              <span>
+                用户名
+                <nz-tooltip [nzTitle]="'用于登录，请认真填写'">
+                  <i nz-tooltip class="anticon anticon-question-circle-o"></i>
+                </nz-tooltip>
+              </span>
+        </label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('username')">
+        <nz-input [nzSize]="'large'" formControlName="username" [nzId]="'username'"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('username').dirty&&getFormControl('username').hasError('required')">请输入您的用户名（即登录名）!</div>
+      </div>
+    </div>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="password" nz-form-item-required>密码</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('password')">
+        <nz-input [nzSize]="'large'" formControlName="password" [nzType]="'password'" [nzId]="'password'" (ngModelChange)="updateConfirmValidator()"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('password').dirty&&getFormControl('password').hasError('required')">请输入您要设定的密码!</div>
+      </div>
+    </div>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="checkPassword" nz-form-item-required>确认密码</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('confirm')">
+        <nz-input [nzSize]="'large'" formControlName="confirm" [nzType]="'password'" [nzId]="'checkPassword'"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('confirm').dirty&&getFormControl('confirm').hasError('required')">请再次输入您要设定的密码!</div>
+        <div nz-form-explain *ngIf="getFormControl('confirm').dirty&&getFormControl('confirm').hasError('check')">两次密码必须一致!</div>
+      </div>
+    </div>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="email" nz-form-item-required>邮箱</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('email')">
+        <nz-input [nzSize]="'large'" formControlName="email" [nzId]="'email'"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('email').dirty&&getFormControl('email').hasError('email')">不是一个真实有效的邮件格式（重要）!</div>
       </div>
     </div>
 
-    <div formGroupName="passwordgrp">
-      <div class="form-group">
-        <label class="col-lg-3 control-label" for="password">密 码:</label>
-        <div class="col-lg-9">
-          <input class="input-lg" type="password" id="password" formControlName="password" placeholder="请输入密码" pPassword>
-          <span *ngIf="formErrors['passwordgrp.password']" class="alert alert-danger">{{formErrors['passwordgrp.password']}}</span>
-          <span *ngIf="signUpForm.get('passwordgrp.password').valid" class="glyphicon glyphicon-ok"></span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="col-lg-3 control-label" for="confirm">确认密码:</label>
-        <div class="col-lg-9">
-          <input class="input-lg" type="password" id="confirm" formControlName="confirm" placeholder="请再次输入密码" pPassword>
-          <span *ngIf="formErrors['passwordgrp.confirm']" class="alert alert-danger">{{formErrors['passwordgrp.confirm']}}</span>
-          <span *ngIf="formErrors.passwordgrp && (!formErrors['passwordgrp.confirm'] && !formErrors['passwordgrp.password'])" class="alert alert-danger">
-            {{formErrors.passwordgrp}}
-          </span>
-          <span *ngIf="signUpForm.get('passwordgrp.confirm').valid && signUpForm.get('passwordgrp').valid" class="glyphicon glyphicon-ok"></span>
-        </div>
-      </div>
-    </div>
 
-    <div class="form-group">
-      <label for="lastname" class="col-lg-3 control-label">姓 氏:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="text" name="lastname" id="lastname" formControlName="lastname" placeholder="请输入您的姓氏">
-        <span *ngIf="formErrors.lastname" class="alert alert-danger">{{formErrors.lastname}}</span>
-        <span *ngIf="signUpForm.get('lastname').valid" class="glyphicon glyphicon-ok"></span>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="phoneNumber" nz-form-item-required>电话号码</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('phone')">
+        <nz-input-group [nzSize]="'large'" [nzCompact]="true">
+          <nz-select formControlName="phoneNumberPrefix" style="width: 25%;">
+            <nz-option [nzLabel]="'+86'" [nzValue]="'+86'"></nz-option>
+          </nz-select>
+          <input formControlName="phone" id="'phoneNumber'" nz-input style="width: 75%;">
+        </nz-input-group>
+        <div nz-form-explain *ngIf="getFormControl('phone').dirty&&getFormControl('phone').hasError('required')">请输入您的电话号码!</div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="firstname" class="col-lg-3 control-label">名 字:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="text" name="firstname" id="firstname" formControlName="firstname" placeholder="请输入您的名字">
-        <span *ngIf="formErrors.firstname" class="alert alert-danger">{{formErrors.firstname}}</span>
-        <span *ngIf="signUpForm.get('firstname').valid" class="glyphicon glyphicon-ok"></span>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="lastname" nz-form-item-required>姓氏</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('lastname')">
+        <nz-input [nzSize]="'large'" formControlName="lastname" [nzId]="'lastname'"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('lastname').dirty&&getFormControl('lastname').hasError('required')">请输入您的姓氏!</div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="email" class="col-lg-3 control-label">邮 箱:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="email" name="email" id="email" formControlName="email" placeholder="请输入您的常用邮箱">
-        <span *ngIf="formErrors.email" class="alert alert-danger">{{formErrors.email}}</span>
-        <span *ngIf="signUpForm.get('email').valid" class="glyphicon glyphicon-ok"></span>
+    <div nz-form-item nz-row>
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="firstname" nz-form-item-required>名字</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback [nzValidateStatus]="getFormControl('firstname')">
+        <nz-input [nzSize]="'large'" formControlName="firstname" [nzId]="'firstname'"></nz-input>
+        <div nz-form-explain *ngIf="getFormControl('firstname').dirty&&getFormControl('firstname').hasError('required')">请输入您的名字!</div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="phone" class="col-lg-3 control-label">电 话:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" name="phone" id="phone" formControlName="phone" placeholder="请输入您的电话号码">
-        <span *ngIf="formErrors.phone" class="alert alert-danger">{{formErrors.phone}}</span>
-        <span *ngIf="signUpForm.get('phone').valid" class="glyphicon glyphicon-ok"></span>
+    <div nz-form-item nz-row style="margin-bottom:8px;">
+      <div nz-form-control nz-col [nzSpan]="14" [nzOffset]="6">
+        <label nz-checkbox formControlName="agree">
+          <span>我已经同意此 <a>协议</a></span>
+        </label>
       </div>
     </div>
-    <div class="form-group">
-      <div class="col-lg-9 col-lg-offset-3">
-        <button class="btn btn-warning" type="reset" value="重 置">重 置</button>
-        <button class="btn btn-primary" type="submit" value="注 册" [disabled]="!signUpForm.valid">注 册</button>
+    <div nz-form-item nz-row style="margin-bottom:8px;">
+      <div nz-form-control nz-col [nzSpan]="14" [nzOffset]="6" >
+        <button nz-button [nzSize]="'large'" [nzType]="'primary'" [disabled]="!signUpForm.valid">注册</button>
+        <button nz-button [nzSize]="'large'" [nzType]="'default'" type="reset">重置</button>
       </div>
     </div>
-  </div>
-</form>
-<!--<p>Form:{{signUpForm.value | json}}</p>-->
-<!--<p>Form status:{{signUpForm.get('passwordgrp.password').valid}}</p>-->
-
+  </form>
+</nz-root>

@@ -1,14 +1,12 @@
-import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Instrument} from '../../models/instrument';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {LimsRestService} from '../../service/lims-rest.service';
 import {ScheduleReservation} from '../../models/schedule-reservation';
 import {Reservation} from '../../models/reservation';
 import * as moment from 'moment';
-import {AuthenticationService} from "../../service/authentication.service";
 import {User} from "../../models/user";
-import {Message} from 'primeng/primeng';
-import {now} from "moment";
+
 import {InstrumentRecord} from "../../models/instrument-record";
 
 @Component({
@@ -25,7 +23,7 @@ export class InstrumentDetailComponent implements OnInit {
 
   instrument: Instrument;
 
-  scheduleEvents: ScheduleReservation[];
+  scheduleEvents: ScheduleReservation[]=[];
   header: any;
   businessHours:any;
 
@@ -35,7 +33,7 @@ export class InstrumentDetailComponent implements OnInit {
   event_Constraint: any;
 
   growlStyle:any;
-  instrumentRecords:InstrumentRecord[]=[];
+  isUsing:boolean=false;
 
   constructor(
     private restService: LimsRestService,
@@ -49,6 +47,7 @@ export class InstrumentDetailComponent implements OnInit {
       center: 'title',
       right: 'month,agendaWeek,agendaDay listWeek'
     };
+
   }
   ngOnInit() {
     const storedUser = JSON.parse(localStorage.getItem('currentUser'))
@@ -78,7 +77,7 @@ export class InstrumentDetailComponent implements OnInit {
           this.admin = ins_users['users'][0];
           console.log(this.instrument.id)
         },
-        error => {console.log('getInstrument method error:', error)},
+        error => {},
         () => {
           this.min_sche = this.instrument.reservation_start_time ? this.instrument.reservation_start_time : '00:00';
           this.max_sche = this.instrument.reservation_end_time ? this.instrument.reservation_end_time : '24:00';
@@ -89,60 +88,54 @@ export class InstrumentDetailComponent implements OnInit {
             end: this.max_sche
           };
           this.getInstrumentRecords(this.instrument.id);
+          this.getReservation(this.instrument.id);
         }
       );
   }
 
   getInstrumentRecords(instrumentId:number){
-    this.restService.getInstrumentRecords(instrumentId).subscribe(
+
+    // 3个月之内的历史记录
+    const pastTime = moment().subtract(3, 'months').format('YYYY-MM-DD');
+    this.restService.getInstrumentRecords(instrumentId,pastTime).subscribe(
       (data:InstrumentRecord[])=>{
-      this.instrumentRecords = data;
-    },
-      error => {console.log('getInstrumentRecords method error:', error)},
-      ()=>{
-        this.getReservation(instrumentId);
-      }
-    )
+        let record_Users = data['users'];
+        let instrumentRecords = data['instrument_records'];
+        for(let p=0; p<instrumentRecords.length;p++){
+          if (instrumentRecords[p].end_time){
+            const event = new ScheduleReservation();
+            event.userId = instrumentRecords[p].user;
+
+            for (let i=0;i<record_Users.length;i++){
+              if (event.userId == record_Users[i].id) {
+                event.title = record_Users[i].last_name + record_Users[i].first_name;
+                break;
+              }
+            }
+            event.start = instrumentRecords[p].start_time;
+            event.end = instrumentRecords[p].end_time;
+            event.editable = false;
+            event.backgroundColor = '#939593'; // 历史记录-真实使用时间
+
+            this.scheduleEvents.push(event);
+          }
+          else {
+            this.isUsing=true;
+          }
+        }
+    })
   }
 
   getReservation(instrumentId: number) {
-    this.scheduleEvents = [];
-    let allReservations:Reservation[]=[];
-    let allUsers:User[]=[];
+    const today = moment().format('YYYY-MM-DD');
 
-    this.restService.getReservations(instrumentId)
+    this.restService.getReservations(instrumentId,today)
       .subscribe(
         (data)=> {
-          allReservations= data['reservations'];
-          allUsers = data['users'];
-console.log('data',data) // todo:allReservations只能获取到前10个
+          console.log('reservation data:',data)
+          let allReservations= data['reservations'];
+          let reservation_users = data['users'];
           const now_time = moment().format();
-          const today = moment();
-          const pastTime = today.subtract(3, 'months').format();
-
-          // 3个月之内的历史记录
-          for(let p=0; p<this.instrumentRecords.length;p++){
-            if (this.instrumentRecords[p].end_time && this.isBefore(this.instrumentRecords[p].end_time,now_time) && this.isBefore(pastTime,this.instrumentRecords[p].end_time)){
-              const event = new ScheduleReservation();
-              // event.id = this.instrumentRecords[p].id;
-              event.userId = this.instrumentRecords[p].user;
-
-              for (let i=0;i<allUsers.length;i++){
-                if (event.userId == allUsers[i].id) {
-                  event.title = allUsers[i].last_name + allUsers[i].first_name;
-                  break;
-                }
-              }
-              event.start = this.instrumentRecords[p].start_time;
-              event.end = this.instrumentRecords[p].end_time;
-              event.editable = false;
-              event.backgroundColor = '#939593'; // 历史记录-真实使用时间
-
-              if (moment(event.start).isSameOrAfter(pastTime)) {
-                this.scheduleEvents.push(event);
-              }
-            }
-          }
 
           //当前时间之后的预约情况
            for (let j=0;j<allReservations.length;j++) {
@@ -151,9 +144,9 @@ console.log('data',data) // todo:allReservations只能获取到前10个
               event.id = allReservations[j].id;
               event.userId = allReservations[j].user;
 
-              for (let i=0;i<allUsers.length;i++){
-                if (event.userId == allUsers[i].id) {
-                  event.title = allUsers[i].last_name + allUsers[i].first_name;
+              for (let i=0;i<reservation_users.length;i++){
+                if (event.userId == reservation_users[i].id) {
+                  event.title = reservation_users[i].last_name + reservation_users[i].first_name;
                   break;
                 }
               }
@@ -185,7 +178,6 @@ console.log('data',data) // todo:allReservations只能获取到前10个
                 this.scheduleEvents.push(event);
             }
           }
-          console.log(this.scheduleEvents)
         }
       )
   }

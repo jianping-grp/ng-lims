@@ -14,7 +14,6 @@ import {ShareService} from './service/share.service';
 import {ScheduleModule} from 'primeng/primeng';
 import {ShareModule} from './share/share.module';
 import {LimsRestService} from './service/lims-rest.service';
-import {AuthenticationService} from './service/authentication.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
 import {NgZorroAntdModule} from "ng-zorro-antd/src/release/ng-zorro-antd.module";

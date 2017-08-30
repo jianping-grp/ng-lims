@@ -1,0 +1,16 @@
+h4{
+  margin-bottom: 10px;
+}
+
+.login-form {
+  max-width: 300px;
+  margin: 30px auto;
+}
+
+.login-form-forgot {
+  float: right;
+}
+
+.login-form-button {
+  width: 100%;
+}

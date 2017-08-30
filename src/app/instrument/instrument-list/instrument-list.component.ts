@@ -18,6 +18,9 @@ export class InstrumentListComponent implements OnInit {
   errorMsg: string;
 
   meta:Meta;
+  _total:number;
+  _current:number=1;
+  _pageSize:number=9;
 
   departmentId:number;
 
@@ -32,7 +35,6 @@ export class InstrumentListComponent implements OnInit {
         (params: Params) => {
           this.departmentId = +params['department'];
           this.getInstrumentListByDepartment(this.departmentId);
-
         }
       )
   }
@@ -44,7 +46,7 @@ export class InstrumentListComponent implements OnInit {
       if (isNaN(departmentId)) {
         departmentId = 0;
       }
-      this.restService.getInstrumentListByDepartment(departmentId,e)
+      this.restService.getInstrumentListByDepartment(departmentId,e,this._pageSize)
         .subscribe(
           data => {
             this.admins = data['users'];

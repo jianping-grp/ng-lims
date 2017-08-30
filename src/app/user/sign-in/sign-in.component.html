@@ -1,36 +1,48 @@
+<nz-root>
 
+  <div *ngIf="currentUser; else signinFormBlock">
+    <p>欢迎登录联合院系统</p>
+  </div>
+  <ng-template #signinFormBlock>
 
-<div *ngIf="currentUser; else signinFormBlock">
-  <p>欢迎登录联合院系统</p>
-</div>
-<ng-template #signinFormBlock>
-
-<form class="form-horizontal well-lg" #signInForm="ngForm" (ngSubmit)="signIn()" novalidate>
-  <div class="page-header">
     <h4>欢迎登录使用TJAB仪器管理平台</h4>
-  </div>
-  <div class="well">
-    <div class="form-group">
-      <label for="username" class="col-lg-3 control-label">用户名:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="text" name="username" id="username" [(ngModel)]="username"  placeholder="请输入您的用户名">
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="password" class="col-lg-3 control-label">密 码:</label>
-      <div class="col-lg-9">
-        <input class="input-lg" type="password" name="password" id="password" [(ngModel)]="password"  placeholder="请输入您的密码">
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-lg-9 col-lg-offset-3">
-        <button class="btn btn-warning" type="reset">重 置</button>
-        <button class="btn btn-primary" type="submit">登 录</button>
-      </div>
-    </div>
-  </div>
-</form>
+    <hr>
 
-</ng-template>
+    <form nz-form [formGroup]="signInForm" class="login-form" (ngSubmit)="signIn()">
+      <div nz-form-item nz-row>
+        <div nz-form-control nzHasFeedback [nzValidateStatus]="signInForm.controls.username">
+          <nz-input formControlName="username" [nzPlaceHolder]="'用户名'" [nzSize]="'large'">
+            <ng-template #prefix>
+              <i class="anticon anticon-user"></i>
+            </ng-template>
+          </nz-input>
+          <div nz-form-explain *ngIf="signInForm.controls.username.dirty&&signInForm.controls.username.hasError('required')">请输入您的用户名!</div>
+        </div>
+      </div>
+      <div nz-form-item nz-row>
+        <div nz-form-control nzHasFeedback [nzValidateStatus]="signInForm.controls.password">
+          <nz-input formControlName="password" [nzType]="'password'" [nzPlaceHolder]="'密码'" [nzSize]="'large'">
+            <ng-template #prefix>
+              <i class="anticon anticon-lock"></i>
+            </ng-template>
+          </nz-input>
+          <div nz-form-explain *ngIf="signInForm.controls.password.dirty&&signInForm.controls.password.hasError('required')">请输入您的密码!</div>
+        </div>
+      </div>
+      <div nz-form-item nz-row>
+        <div nz-form-control>
+          <!--<label nz-checkbox formControlName="remember">-->
+            <!--<span>记住我</span>-->
+          <!--</label>-->
+          <a class="login-form-forgot" class="login-form-forgot">忘记密码？</a>
+          <button nz-button class="login-form-button" [nzType]="'primary'" [nzSize]="'large'" [disabled]="!signInForm.valid">登录</button>
+          或
+          <a [routerLink]="['../sign-up']">注册!</a>
+        </div>
+      </div>
+    </form>
+
+  </ng-template>
 
 
+</nz-root>

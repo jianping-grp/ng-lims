@@ -1,0 +1,9 @@
+.card-class{
+  width:34%;
+  margin: 0 auto;
+}
+
+.card-outer{
+  background: #ECECEC;
+  padding: 30px;
+}
