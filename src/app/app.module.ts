@@ -16,9 +16,9 @@ import {ShareModule} from './share/share.module';
 import {LimsRestService} from './service/lims-rest.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
-import {NgZorroAntdModule} from "ng-zorro-antd/src/release/ng-zorro-antd.module";
 import {UserComponent} from "./user/app-user/user.component";
 import {ModalModule} from "ngx-bootstrap";
+import {NgZorroAntdModule} from "ng-zorro-antd";
 
 @NgModule({
   declarations: [

@@ -5,11 +5,11 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RouterModule} from '@angular/router';
 import {PasswordModule} from "primeng/primeng";
-import {NgZorroAntdModule} from "ng-zorro-antd/src/release/ng-zorro-antd.module";
 import {UserRoutingModule} from "./user-routing.module";
 import { UserInfoComponent } from './user-info/user-info.component';
 import { UserRecordComponent } from './user-record/user-record.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import {NgZorroAntdModule} from "ng-zorro-antd";
 
 @NgModule({
   imports: [

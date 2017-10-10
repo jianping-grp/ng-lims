@@ -15,8 +15,7 @@ import {FormsModule} from '@angular/forms';
 import {DateTimePickerModule} from 'ng-pick-datetime';
 import { DaScheduleComponent } from './instrument-detail/chart-schedule/chart-schedule.component';
 import { ReservationScheduleComponent } from './instrument-detail/reservation-schedule/reservation-schedule.component';
-import {NgZorroAntdModule} from "ng-zorro-antd/src/release/ng-zorro-antd.module";
-
+import {NgZorroAntdModule} from "ng-zorro-antd";
 
 @NgModule({
   imports: [
